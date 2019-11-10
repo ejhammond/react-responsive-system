@@ -1,4 +1,4 @@
-import { AdaptiveProps, createScreenClassProvider } from '../dist';
+import { ResponsiveProps, createScreenClassProvider } from '../dist';
 
 const breakpoints = {
   xs: 500,
@@ -9,10 +9,10 @@ const breakpoints = {
 
 export const {
   ScreenClassProvider,
-  useAdaptiveProps,
+  useResponsiveProps,
 } = createScreenClassProvider({
   defaultScreenClass: 'lg',
   breakpoints,
 });
 
-export type Adaptive<P extends {}> = AdaptiveProps<typeof breakpoints, P>;
+export type Responsive<P extends {}> = ResponsiveProps<typeof breakpoints, P>;

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Adaptive, useAdaptiveProps } from './adaptiveProps';
+import { Responsive, useResponsiveProps } from './responsiveSystem';
 
 type CustomComponentProps = {
   someColor?: string;
@@ -7,11 +7,12 @@ type CustomComponentProps = {
 };
 
 export const CustomComponent: React.FC<
-  Adaptive<CustomComponentProps>
+  Responsive<CustomComponentProps>
 > = props => {
-  const { someColor = '#000000', someText = 'Default text' } = useAdaptiveProps<
-    CustomComponentProps
-  >(props);
+  const {
+    someColor = '#000000',
+    someText = 'Default text',
+  } = useResponsiveProps<CustomComponentProps>(props);
 
   return (
     <div
