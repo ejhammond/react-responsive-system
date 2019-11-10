@@ -1,6 +1,6 @@
 {
   "name": "react-responsive-system",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "license": "MIT",
   "author": "Tripp Hammond",
   "main": "dist/index.js",
