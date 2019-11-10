@@ -1,4 +1,4 @@
-# Responsive Props
+# Responsive System
 
 Make your components screen-size aware.
 
@@ -18,7 +18,7 @@ What if you could just write:
 
 The idea is: each of your components could have props that correspond to your own custom screen classes (maybe that's `mobile` and `desktop`, or maybe `sm`, `md`. `lg`). These props would contain any overrides that you want to apply to the component based on the screen class.
 
-That's exactly what Responsive Props can do for you, and the best part is: you can drop-in this solution to any existing component in a snap!
+That's exactly what Responsive System can do for you, and the best part is: you can drop-in this solution to any existing component in a snap!
 
 ## Getting Started
 
@@ -94,7 +94,7 @@ This is what I meant when I said that you could drop-in the functionality! All y
 
 ### 4. Profit?
 
-Once you've completed those 3 steps, you can start adding Responsive Props to your component. Each key from your `breakpoints` will be a valid prop!
+Once you've completed those 3 steps, you can start adding Responsive System props to your component. Each key from your `breakpoints` will be a valid prop!
 
 ```js
 <Button
@@ -106,7 +106,7 @@ Once you've completed those 3 steps, you can start adding Responsive Props to yo
 
 ### Organizing
 
-The way that you organize your project is entirely up to you, but I've found it to be convenient to configure Responsive Props in its own file and then to import `ScreenClassProvider` and `useResponsiveProps` where ever they're needed. This keeps the index file tidy.
+The way that you organize your project is entirely up to you, but I've found it to be convenient to configure Responsive System in its own file and then to import `ScreenClassProvider` and `useResponsiveProps` where ever they're needed. This keeps the index file tidy.
 
 ```ts
 // {root}/ResponsiveProps.ts
@@ -142,7 +142,7 @@ export const {
 />
 ```
 
-In the above example, the "Default text" would be overridden on `sm` and `lg` screens, but on `xs` and `md` screens, you'd still see "Default text". That's because, by default, the Responsive Props will only apply to their own screen class.
+In the above example, the "Default text" would be overridden on `sm` and `lg` screens, but on `xs` and `md` screens, you'd still see "Default text". That's because, by default, the overrides will only apply to the specific screen class on which they were defined.
 
 But what if you wanted to use that "Small screen text" and "mini" button on `xs` screens too?
 
