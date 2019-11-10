@@ -104,33 +104,7 @@ Once you've completed those 3 steps, you can start adding Responsive System prop
 />
 ```
 
-### Organizing
-
-The way that you organize your project is entirely up to you, but I've found it to be convenient to configure Responsive System in its own file and then to import `ScreenClassProvider` and `useResponsiveProps` where ever they're needed. This keeps the index file tidy.
-
-```ts
-// {root}/ResponsiveProps.ts
-
-import {
-  createScreenClassProvider,
-  ResponsiveProps,
-} from 'react-responsive-system';
-
-const breakpoints = {
-  xs: 500,
-  sm: 750,
-  md: 1000,
-  lg: Infinity,
-};
-
-export const {
-  ScreenClassProvider,
-  useResponsiveProps,
-} = createScreenClassProvider({
-  defaultScreenClass: 'lg',
-  breakpoints,
-});
-```
+[See an example on GitHub](https://github.com/tripphamm/react-responsive-system/tree/master/example)
 
 ## `andLarger` + `andSmaller`
 
@@ -252,7 +226,7 @@ Here are the two most useful types that we export:
 type ScreenClass<B extends ScreenClassBreakpoints> = keyof B;
 
 /**
- * A type that can be wrapped around your components' props in order to represent the new Responsive Props that they have
+ * A type that can be wrapped around your components' props in order to represent the new props that they have
  */
 type ResponsiveProps<B extends ScreenClassBreakpoints, P extends {}> = Omit<
   P,
