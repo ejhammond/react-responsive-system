@@ -1,10 +1,10 @@
 {
-  "name": "react-responsive-props",
+  "name": "react-adaptive-props",
   "version": "0.1.0",
   "license": "MIT",
   "author": "Tripp Hammond",
   "main": "dist/index.js",
-  "module": "dist/react-responsive-props.esm.js",
+  "module": "dist/react-adaptive-props.esm.js",
   "typings": "dist/index.d.ts",
   "files": [
     "dist"
@@ -13,7 +13,8 @@
     "start": "tsdx watch",
     "build": "tsdx build",
     "test": "tsdx test --env=jsdom",
-    "lint": "tsdx lint"
+    "lint": "tsdx lint",
+    "release": "yarn build && yarn publish"
   },
   "peerDependencies": {
     "react": ">=16.8"
