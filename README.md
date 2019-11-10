@@ -1,4 +1,4 @@
-# Adaptive Props
+# Responsive Props
 
 Make your components screen-size aware.
 
@@ -18,7 +18,7 @@ What if you could just write:
 
 The idea is: each of your components could have props that correspond to your own custom screen classes (maybe that's `mobile` and `desktop`, or maybe `sm`, `md`. `lg`). These props would contain any overrides that you want to apply to the component based on the screen class.
 
-That's exactly what Adaptive Props can do for you, and the best part is: you can drop-in this solution to any existing component in a snap!
+That's exactly what Responsive Props can do for you, and the best part is: you can drop-in this solution to any existing component in a snap!
 
 ## Getting Started
 
@@ -43,21 +43,21 @@ The values that you provide are the "maximum pixel-widths" for that screen class
 
 ```js
 // at the root of your app
-import { createScreenClassProvider } from 'react-adaptive-props';
+import { createScreenClassProvider } from 'react-responsive-system';
 
 const breakpoints = {
   // your breakpoints here
 };
 
 // generate the custom Provider and a hook that will Consume it
-const { ScreenClassProvider, useAdaptiveProps } = createScreenClassProvider({
+const { ScreenClassProvider, useResponsiveProps } = createScreenClassProvider({
   breakpoints,
   // this is the screenClass that will be used if we can't determine the width of the window (e.g. during SSR)
   defaultScreenClass: 'lg',
 });
 
-// export the useAdaptiveProps hook so that other components can use it
-export { useAdaptiveProps };
+// export the useResponsiveProps hook so that other components can use it
+export { useResponsiveProps };
 
 // render the ScreenClassProvider at (or near) the root of your app
 ReactDOM.render(
@@ -70,10 +70,10 @@ ReactDOM.render(
 
 > Tip: if you're building a component library, you'll want to export the `ScreenClassProvider` for your users to render in their apps!
 
-### 3. useAdaptiveProps in your components
+### 3. useResponsiveProps in your components
 
 ```js
-import { useAdaptiveProps } from '../index.js'; // or where ever you exported it from
+import { useResponsiveProps } from '../index.js'; // or where ever you exported it from
 
 // before
 const Button = props => {
@@ -84,17 +84,17 @@ const Button = props => {
 
 // after
 const Button = props => {
-  const { buttonSize, buttonType, buttonText } = useAdaptiveProps(props);
+  const { buttonSize, buttonType, buttonText } = useResponsiveProps(props);
 
   // return ...
 };
 ```
 
-This is what I meant when I said that you could drop-in the functionality! All you need to do is replace `props` with `useAdaptiveProps(props)`. The hook will consume the screenClass props e.g. `xs`, `sm`, `md` and will return a clean `props` that matches your existing API!
+This is what I meant when I said that you could drop-in the functionality! All you need to do is replace `props` with `useResponsiveProps(props)`. The hook will consume the screenClass props e.g. `xs`, `sm`, `md` and will return a clean `props` that matches your existing API!
 
 ### 4. Profit?
 
-Once you've completed those 3 steps, you can start adding Adaptive Props to your component. Each key from your `breakpoints` will be a valid prop!
+Once you've completed those 3 steps, you can start adding Responsive Props to your component. Each key from your `breakpoints` will be a valid prop!
 
 ```js
 <Button
@@ -106,12 +106,15 @@ Once you've completed those 3 steps, you can start adding Adaptive Props to your
 
 ### Organizing
 
-The way that you organize your project is entirely up to you, but I've found it to be convenient to configure Adaptive Props in its own file and then to import `ScreenClassProvider` and `useAdaptiveProps` where ever they're needed. This keeps the index file tidy.
+The way that you organize your project is entirely up to you, but I've found it to be convenient to configure Responsive Props in its own file and then to import `ScreenClassProvider` and `useResponsiveProps` where ever they're needed. This keeps the index file tidy.
 
 ```ts
-// {root}/AdaptiveProps.ts
+// {root}/ResponsiveProps.ts
 
-import { createScreenClassProvider, AdaptiveProps } from 'react-adaptive-props';
+import {
+  createScreenClassProvider,
+  ResponsiveProps,
+} from 'react-responsive-system';
 
 const breakpoints = {
   xs: 500,
@@ -122,7 +125,7 @@ const breakpoints = {
 
 export const {
   ScreenClassProvider,
-  useAdaptiveProps,
+  useResponsiveProps,
 } = createScreenClassProvider({
   defaultScreenClass: 'lg',
   breakpoints,
@@ -139,7 +142,7 @@ export const {
 />
 ```
 
-In the above example, the "Default text" would be overridden on `sm` and `lg` screens, but on `xs` and `md` screens, you'd still see "Default text". That's because, by default, the Adaptive Props will only apply to their own screen class.
+In the above example, the "Default text" would be overridden on `sm` and `lg` screens, but on `xs` and `md` screens, you'd still see "Default text". That's because, by default, the Responsive Props will only apply to their own screen class.
 
 But what if you wanted to use that "Small screen text" and "mini" button on `xs` screens too?
 
@@ -249,9 +252,9 @@ Here are the two most useful types that we export:
 type ScreenClass<B extends ScreenClassBreakpoints> = keyof B;
 
 /**
- * A type that can be wrapped around your components' props in order to represent the new Adaptive Props that they have
+ * A type that can be wrapped around your components' props in order to represent the new Responsive Props that they have
  */
-type AdaptiveProps<B extends ScreenClassBreakpoints, P extends {}> = Omit<
+type ResponsiveProps<B extends ScreenClassBreakpoints, P extends {}> = Omit<
   P,
   keyof B
 > &
@@ -266,43 +269,43 @@ type AdaptiveProps<B extends ScreenClassBreakpoints, P extends {}> = Omit<
 As you can see, both of these types require you to provide your own custom breakpoints. So, you _could_ export your breakpoints and import them everywhere that you need to use one of these types, _or_ you could configure these types in one place and then re-export them!
 
 ```ts
-import { AdaptiveProps, ScreenClass } from 'react-adaptive-props';
+import { ResponsiveProps, ScreenClass } from 'react-responsive-system';
 
 // at the root of your app
 const breakpoints = {
   // your breakpoints here
 };
 
-export type MyAdaptiveProps<P extends {}> = AdaptiveProps<
+export type MyResponsiveProps<P extends {}> = ResponsiveProps<
   typeof breakpoints,
   P
 >;
 export type MyScreenClass = ScreenClass<typeof breakpoints>;
 ```
 
-Now you can import MyAdaptiveProps and MyScreenClass all over your app!
+Now you can import MyResponsiveProps and MyScreenClass all over your app!
 
 Here's a fully-typed example for reference:
 
 ```tsx
-import { AdaptiveProps } from 'react-adaptive-props';
+import { ResponsiveProps } from 'react-responsive-system';
 
 const breakpoints = {
   // your breakpoints here
 }
 
-type MyAdaptiveProps<P extends {}> = AdaptiveProps<typeof breakpoints, P>;
+type MyResponsiveProps<P extends {}> = ResponsiveProps<typeof breakpoints, P>;
 
 type CustomComponentProps = {
   someColor?: string;
   someText: string;
 };
 
-const CustomComponent: React.FC<MyAdaptiveProps<CustomComponentProps>> = props => {
+const CustomComponent: React.FC<MyResponsiveProps<CustomComponentProps>> = props => {
   const {
     someColor = '#000000',
     someText = 'Unknown screen size',
-  } = useAdaptiveProps<CustomComponentProps>(props);
+  } = useResponsiveProps<CustomComponentProps>(props);
 ```
 
 ## Under the Hood

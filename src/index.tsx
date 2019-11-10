@@ -94,17 +94,17 @@ export type ScreenClassConfiguration<B extends ScreenClassBreakpoints> = {
 
 export type ScreenClass<B extends ScreenClassBreakpoints> = keyof B;
 
-export type AdaptiveProp<P extends {}> = Partial<P> & {
+export type ResponsiveProp<P extends {}> = Partial<P> & {
   andLarger?: boolean;
   andSmaller?: boolean;
 };
 
-export type AdaptiveProps<
+export type ResponsiveProps<
   B extends ScreenClassBreakpoints,
   P extends {}
 > = Omit<P, keyof B> &
   {
-    [K in keyof B]?: AdaptiveProp<P>;
+    [K in keyof B]?: ResponsiveProp<P>;
   };
 
 //
@@ -212,14 +212,14 @@ export function createScreenClassProvider<B extends ScreenClassBreakpoints>(
     return <Provider value={currentScreenClass}>{children}</Provider>;
   };
 
-  function useAdaptiveProps<P extends {}>(props: AdaptiveProps<B, P>): P {
+  function useResponsiveProps<P extends {}>(props: ResponsiveProps<B, P>): P {
     const currentScreenClass = React.useContext(screenClassContext);
 
     // optimize this error-check out of production builds
     if (currentScreenClass === undefined) {
       if (__DEV__) {
         throw new Error(
-          "`useAdaptiveProps` may only be used inside of a ScreenClassProvider. Make sure that you've rendered a ScreenClassProvider above this component your tree (usually folks render ScreenClassProvider near the root of their app)"
+          "`useResponsiveProps` may only be used inside of a ScreenClassProvider. Make sure that you've rendered a ScreenClassProvider above this component your tree (usually folks render ScreenClassProvider near the root of their app)"
         );
       }
 
@@ -317,7 +317,7 @@ export function createScreenClassProvider<B extends ScreenClassBreakpoints>(
     sortedScreenClasses
       .slice(0, currentScreenClassIndex)
       .forEach(screenClass => {
-        const screenClassProps = props[screenClass] as AdaptiveProp<P>;
+        const screenClassProps = props[screenClass] as ResponsiveProp<P>;
 
         if (
           screenClassProps !== undefined &&
@@ -339,7 +339,7 @@ export function createScreenClassProvider<B extends ScreenClassBreakpoints>(
       .slice(currentScreenClassIndex + 1)
       .reverse()
       .forEach(screenClass => {
-        const screenClassProps = props[screenClass] as AdaptiveProp<P>;
+        const screenClassProps = props[screenClass] as ResponsiveProp<P>;
 
         if (
           screenClassProps !== undefined &&
@@ -354,7 +354,7 @@ export function createScreenClassProvider<B extends ScreenClassBreakpoints>(
 
     const exactScreenClassProps =
       props[currentScreenClass!] !== undefined
-        ? omit(props[currentScreenClass!] as AdaptiveProp<P>, [
+        ? omit(props[currentScreenClass!] as ResponsiveProp<P>, [
             'andSmaller',
             'andLarger',
           ])
@@ -371,6 +371,6 @@ export function createScreenClassProvider<B extends ScreenClassBreakpoints>(
 
   return {
     ScreenClassProvider,
-    useAdaptiveProps,
+    useResponsiveProps,
   };
 }
