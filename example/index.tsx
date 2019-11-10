@@ -1,7 +1,7 @@
 import 'react-app-polyfill/ie11';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { ScreenClassProvider } from './adaptiveProps';
+import { ScreenClassProvider } from './responsiveSystem';
 import { CustomComponent } from './component';
 
 const App = () => {
