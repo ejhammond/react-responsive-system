@@ -1,5 +1,7 @@
 # Adaptive Props
 
+Make your components screen-size aware.
+
 Your app/website needs to handle different "classes" of screens. CSS can help to apply different styles for different screen classes, but why stop at styles?
 
 Let's say that you have a `Carousel` component that has a prop called `slidesToShow`. You might want to show 4 slides on large screens, but only 2 slides on smallish screens, and probably only 1 on a phone-sized device.
@@ -92,7 +94,7 @@ This is what I meant when I said that you could drop-in the functionality! All y
 
 ### 4. Profit?
 
-Once you've completed those 3 steps, you can start adding Adaptive props to your component. Each key from your `breakpoints` will be a valid prop!
+Once you've completed those 3 steps, you can start adding Adaptive Props to your component. Each key from your `breakpoints` will be a valid prop!
 
 ```js
 <Button
@@ -104,7 +106,7 @@ Once you've completed those 3 steps, you can start adding Adaptive props to your
 
 ### Organizing
 
-The way that you organize your project is entirely up to you, but I've found it to be convenient to configure AdaptiveProps in its own file and then to import `ScreenClassProvider` and `useAdaptiveProps` where ever they're needed. This keeps the index file tidy.
+The way that you organize your project is entirely up to you, but I've found it to be convenient to configure Adaptive Props in its own file and then to import `ScreenClassProvider` and `useAdaptiveProps` where ever they're needed. This keeps the index file tidy.
 
 ```ts
 // {root}/AdaptiveProps.ts
@@ -137,7 +139,7 @@ export const {
 />
 ```
 
-In the above example, the "Default text" would be overridden on `sm` and `lg` screens, but on `xs` and `md` screens, you'd still see "Default text". That's because, by default, the Adaptive props will only apply to their own screen class.
+In the above example, the "Default text" would be overridden on `sm` and `lg` screens, but on `xs` and `md` screens, you'd still see "Default text". That's because, by default, the Adaptive Props will only apply to their own screen class.
 
 But what if you wanted to use that "Small screen text" and "mini" button on `xs` screens too?
 
@@ -247,7 +249,7 @@ Here are the two most useful types that we export:
 type ScreenClass<B extends ScreenClassBreakpoints> = keyof B;
 
 /**
- * A type that can be wrapped around your components' props in order to represent the new Adaptive props that they have
+ * A type that can be wrapped around your components' props in order to represent the new Adaptive Props that they have
  */
 type AdaptiveProps<B extends ScreenClassBreakpoints, P extends {}> = Omit<
   P,
