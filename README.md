@@ -16,17 +16,13 @@ What if you could just write:
 
 The idea is: each of your components could have props that correspond to your own custom screen classes (maybe that's `mobile` and `desktop`, or maybe `sm`, `md`. `lg`). These props would contain any overrides that you want to apply to the component based on the screen class.
 
-That's exactly what Responsive Props can do for you, and the best part is: you can drop-in this solution to any existing component in a snap.
+That's exactly what Responsive Props can do for you, and the best part is: you can drop-in this solution to any existing component in a snap!
 
 ## Getting Started
 
 There are 3 steps to enabling this functionality in your components:
 
 ### 1. Define your breakpoints in JS
-
-Each key in this object will become a prop on your components--watch out for naming conflicts!
-
-The values that you provide are the "maximum pixel-widths" for that screen class. In order to make sure that all possible screen pixel-sizes are handled, there should be exactly one screen class with a value of `Infinity` which tells us that there is no maximum pixel-width for that screen class.
 
 ```js
 const breakpoints = {
@@ -36,6 +32,10 @@ const breakpoints = {
   lg: Infinity, // 1001+ -> "lg"
 };
 ```
+
+> Tip: Each key in this object will become a prop on your components--watch out for naming conflicts!
+
+The values that you provide are the "maximum pixel-widths" for that screen class. In order to make sure that all possible screen pixel-sizes are handled, there should be exactly one screen class with a value of `Infinity` which tells us that there is no maximum pixel-width for that screen class.
 
 ### 2. Generate your customized utilities, and render/export the ScreenClassProvider
 
@@ -50,7 +50,8 @@ const breakpoints = {
 // generate the custom Provider and a hook that will Consume it
 const { ScreenClassProvider, useResponsiveProps } = createScreenClassProvider({
   breakpoints,
-  defaultScreenClass: 'lg', // this is the screenClass that will be used if we can't determine the width of the window (e.g. during SSR)
+  // this is the screenClass that will be used if we can't determine the width of the window (e.g. during SSR)
+  defaultScreenClass: 'lg',
 });
 
 // export the useResponsiveProps hook so that other components can use it
@@ -65,7 +66,7 @@ ReactDOM.render(
 );
 ```
 
-> Tip: if you're building a component library, just export the `ScreenClassProvider` for your users instead!
+> Tip: if you're building a component library, you'll want to export the `ScreenClassProvider` for your users to render in their apps!
 
 ### 3. useResponsiveProps in your components
 
@@ -86,6 +87,8 @@ const Button = props => {
   // return ...
 };
 ```
+
+This is what I meant when I said that you could drop-in the functionality! All you need to do is replace `props` with `useResponsiveProps(props)`. The hook will consume the screenClass props e.g. `xs`, `sm`, `md` and will return a clean `props` that matches your existing API!
 
 ### 4. Profit?
 
@@ -122,7 +125,7 @@ export const {
   ScreenClassProvider,
   useResponsiveProps,
 } = createScreenClassProvider({
-  defaultScreenClass: 'xl',
+  defaultScreenClass: 'lg',
   breakpoints,
 });
 ```
@@ -194,6 +197,8 @@ This is okay though:
 
 Whenever you see `andSmaller` or `andLarger`, picture an arrow pointing in the direction that they're referring to (`andSmaller` points up, `andLarger` points down) if two arrows point at one another, they crash and that's an error. In the example above, the arrows would point away from each other, and that works just fine!
 
+But what if the arrows are pointing in the same direction...
+
 #### 2. Overlapping directives will be applied in order from furthest away to closest
 
 Take this example:
@@ -234,7 +239,7 @@ The final buttonSize would be "microscopic" which fits with our mental model sin
 
 ## TypeScript
 
-Everybody loves nice types. This lib was written with TypeScript, so utilities themselves are well-typed, but their types depend on the specific breakpoints that you've configured. Because of this, you'll want to "configure" our types with your breakpoints as well!
+Everybody loves nice types. This lib was written with TypeScript, so utilities themselves are well-typed, but their types depend on the specific breakpoints that you've configured. Because of this, you'll want to "configure" the types before using them.
 
 Here are the two most useful types that we export:
 
@@ -307,4 +312,4 @@ For folks who are curious about the implementation:
 
 Fundamentally, we need our components to be aware of the current screen class so they know when to re-render. We do this by setting up a single resize event-listener at the root of the app, and Providing the screen class via React Context.
 
-For better perf while your users are rapidly resizing their screens to see if your site breaks, there's a little debounce. You can configure the debounce delay by supplying an `resizeUpdateDelay` to the config object when you `createScreenClassProvider`.
+For better perf while your users are rapidly resizing their screens to see if your site breaks, there's a little debounce. You can configure the debounce delay by supplying a `resizeUpdateDelay` to the config object when you `createScreenClassProvider`.
