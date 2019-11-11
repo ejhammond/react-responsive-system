@@ -106,113 +106,6 @@ Once you've completed those 3 steps, you can start adding Responsive System prop
 
 [See an example on GitHub](https://github.com/tripphamm/react-responsive-system/tree/master/example)
 
-## `andLarger` + `andSmaller`
-
-```js
-<Button
-  buttonText="Default text"
-  sm={{ buttonText: 'Small screen text', buttonSize: 'mini' }}
-  lg={{ buttonText: 'Large screen text', buttonSize: 'large' }}
-/>
-```
-
-In the above example, the "Default text" would be overridden on `sm` and `lg` screens, but on `xs` and `md` screens, you'd still see "Default text". That's because, by default, the overrides will only apply to the specific screen class on which they were defined.
-
-But what if you wanted to use that "Small screen text" and "mini" button on `xs` screens too?
-
-Well, you could copy and paste the overrides from `sm` into the `xs` prop, but that gets 0 likes.
-
-Instead, you can make use of the `andSmaller` directive to indicate that you want to apply the overrides on "`sm` screens _andSmaller_"!
-
-Here's what it looks like:
-
-```js
-<Button
-  buttonText="Default text"
-  sm={{ andSmaller: true, buttonText: 'Small screen text', buttonSize: 'mini' }}
-  lg={{ buttonText: 'Large screen text', buttonSize: 'large' }}
-/>
-```
-
-Now, your `sm` overrides will apply on `sm` screens _and_ any smaller screens as well.
-
-You can probably guess how `andLarger` works, so let's not waste time with that.
-
-### Tips
-
-#### 1. Ambiguous directives will result in an error
-
-If you start to use multiple `andSmaller` or `andLarger`, you might be wondering how conflicting overrides might be applied.
-
-First of all, don't do this:
-
-```js
-// bad!
-<Button
-  xs={{ andLarger: true, buttonSize: 'microscopic' }}
-  sm={{ buttonSize: 'mini' }}
-  lg={{ andSmaller: true, buttonSize: 'humongous' }}
-/>
-```
-
-Here we have the `xs` prop saying that all screen sizes that are larger should have a "microscopic" button, and we also have the `lg` props saying that all screen sizes that are smaller should have a "humongous" button. What size do you think the button should be on `sm` screens?
-
-I don't know either! So that's an error.
-
-In general terms: if some screen class prop uses `andLarger` and a _larger_ screen class prop uses `andSmaller`, that's an error. And likewise if some screen class prop uses `andSmaller` and a _smaller_ screen class prop uses `andLarger`, that's an error too.
-
-This is okay though:
-
-```js
-//
-<Button
-  sm={{ andSmaller: true, buttonSize: 'mini' }}
-  md={{ andLarger: true, buttonSize: 'humongous' }}
-/>
-```
-
-Whenever you see `andSmaller` or `andLarger`, picture an arrow pointing in the direction that they're referring to (`andSmaller` points up, `andLarger` points down) if two arrows point at one another, they crash and that's an error. In the example above, the arrows would point away from each other, and that works just fine!
-
-But what if the arrows are pointing in the same direction...
-
-#### 2. Overlapping directives will be applied in order from furthest away to closest
-
-Take this example:
-
-```js
-<Button
-  sm={{ andSmaller: true, buttonSize: 'mini' }}
-  lg={{ andSmaller: true, buttonSize: 'humongous', buttonText: 'Click me!' }}
-/>
-```
-
-Here's the result:
-
-```js
-{
-  xs: { buttonSize: 'mini', buttonText: 'Click me!' }
-  sm: { buttonSize: 'mini', buttonText: 'Click me!' }
-  md: { buttonSize: 'humongous', buttonText: 'Click me!' }
-  lg: { buttonSize: 'humongous', buttonText: 'Click me!' }
-}
-```
-
-Hopefully that's what you expected! Notice that all sizes got the "Click me!" text from `lg`, and that `md` got the "humongous" buttonSize from `lg`, but `xs` got the "mini" buttonSize from `sm`.
-
-When calculating the props for `xs`, we started as far away as possible (at `lg`) and applied any overrides that were necessary. We assigned "humongous" buttonSize and "Click me!" for the buttonText. Then we moved to `md`; it had no `andSmaller` directive, so we skipped it. Next, we looked at `sm`; it _did_ have an `andSmaller` directive, so we applied its overrides _on top of_ all previous overrides. That's why the "humongous" buttonSize was overridden to be "mini" instead.
-
-Generally, if two directives try to override the same prop, the "closest" one wins. Indeed, if `xs` had defined its own override e.g.
-
-```js
-<Button
-  xs={{ buttonSize: 'microscopic' }}
-  sm={{ andSmaller: true, buttonSize: 'mini' }}
-  lg={{ andSmaller: true, buttonSize: 'humongous', buttonText: 'Click me!' }}
-/>
-```
-
-The final buttonSize would be "microscopic" which fits with our mental model since nothing can be "closer" to `xs` than `xs` itself!
-
 ## TypeScript
 
 Everybody loves nice types. This lib was written with TypeScript, so utilities themselves are well-typed, but their types depend on the specific breakpoints that you've configured. Because of this, you'll want to "configure" the types before using them.
@@ -233,10 +126,7 @@ type ResponsiveProps<B extends ScreenClassBreakpoints, P extends {}> = Omit<
   keyof B
 > &
   {
-    [K in keyof B]?: Partial<P> & {
-      andLarger?: boolean;
-      andSmaller?: boolean;
-    };
+    [K in keyof B]?: Partial<P>;
   };
 ```
 
