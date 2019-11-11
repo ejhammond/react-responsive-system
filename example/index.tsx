@@ -11,8 +11,8 @@ const App = () => {
         someColor="#000000"
         someText="Hello"
         xs={{ someColor: 'rebeccapurple', someText: 'xs' }}
-        sm={{ andSmaller: true, someColor: 'palevioletred', someText: 'sm' }}
-        md={{ andLarger: true, someColor: 'brown', someText: 'md' }}
+        sm={{ someColor: 'palevioletred', someText: 'sm' }}
+        md={{ someColor: 'brown', someText: 'md' }}
         lg={{ someColor: 'green', someText: 'lg' }}
       />
     </ScreenClassProvider>
