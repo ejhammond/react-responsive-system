@@ -1,5 +1,4 @@
 import * as React from 'react';
-import debounce from 'debounce';
 
 //
 // ─── HELPERS ────────────────────────────────────────────────────────────────────
@@ -70,15 +69,6 @@ export type ScreenClassConfiguration<B extends ScreenClassBreakpoints> = {
   defaultScreenClass: keyof B;
 
   /**
-   * How long to wait before re-rendering components while the screen is being resized
-   *
-   * Theoretically, lower numbers could cause a lot of unnecessary re-renders if the user is resizing their screen a lot
-   *
-   * @default 100 (ms)
-   */
-  resizeUpdateDelay?: number;
-
-  /**
    * A mapping of ScreenClass names to the maximum pixel-width where they apply
    *
    * @example
@@ -109,11 +99,7 @@ export type ResponsiveProps<
 export function createScreenClassProvider<B extends ScreenClassBreakpoints>(
   screenClassConfiguration: ScreenClassConfiguration<B>
 ) {
-  const {
-    defaultScreenClass,
-    resizeUpdateDelay = 100,
-    breakpoints,
-  } = screenClassConfiguration;
+  const { defaultScreenClass, breakpoints } = screenClassConfiguration;
 
   //
   // ─── VALIDATE ───────────────────────────────────────────────────────────────────
@@ -170,8 +156,8 @@ export function createScreenClassProvider<B extends ScreenClassBreakpoints>(
   const { Provider } = screenClassContext;
 
   const ScreenClassProvider: React.FC = ({ children }) => {
-    const [windowWidth, setWindowWidth] = React.useState<number | undefined>(
-      windowExists ? window.innerWidth : undefined
+    const [screenClass, setScreenClass] = React.useState<keyof B>(
+      defaultScreenClass
     );
 
     React.useLayoutEffect(() => {
@@ -179,39 +165,66 @@ export function createScreenClassProvider<B extends ScreenClassBreakpoints>(
         return;
       }
 
-      const handler = debounce(() => {
-        setWindowWidth(window.innerWidth);
-      }, resizeUpdateDelay);
+      // build the media queries
+      const screenClassMediaQueries: [
+        keyof B,
+        MediaQueryList
+      ][] = sortedScreenClassBreakpoints.map(
+        ([screenClass, maxWidthPx], index) => {
+          // the minWidth for this screenClass is the maxWidth of the previous breakpoint + 1
+          const minWidthPx =
+            index > 0 ? sortedScreenClassBreakpoints[index - 1][1] + 1 : 0;
 
-      window.addEventListener('resize', handler);
+          const constraints: string[] = [];
+          if (minWidthPx !== 0) {
+            constraints.push(`(min-width: ${minWidthPx}px)`);
+          }
+          if (maxWidthPx !== Infinity) {
+            constraints.push(`(max-width: ${maxWidthPx}px)`);
+          }
 
-      return () => window.removeEventListener('resize', handler);
+          const mediaQuery = constraints.join(' and ');
+
+          const mediaQueryList = window.matchMedia(mediaQuery);
+
+          // in order to set the correct initial state, we need to immediately check each mql
+          if (mediaQueryList.matches) {
+            setScreenClass(screenClass);
+          }
+
+          return [screenClass, mediaQueryList];
+        }
+      );
+
+      type MediaQueryListListener = (
+        this: MediaQueryList,
+        event: MediaQueryListEvent
+      ) => any;
+
+      const listeners: [MediaQueryList, MediaQueryListListener][] = [];
+      screenClassMediaQueries.forEach(([screenClass, mediaQuery]) => {
+        const listener: MediaQueryListListener = event => {
+          if (event.matches) {
+            setScreenClass(screenClass);
+          }
+        };
+
+        mediaQuery.addListener(listener);
+
+        listeners.push([mediaQuery, listener]);
+      });
+
+      return () => listeners.forEach(([mql, l]) => mql.removeListener(l));
     }, []);
 
-    // default value so components will see a not-undefined screenClass even if we haven't been able to calculate a window width
-    let currentScreenClass: ScreenClass<B> = defaultScreenClass;
-    if (windowWidth !== undefined) {
-      // starting from the smallest screen class
-      // check each screen class one-by-one to find the first one whose maxPixelWidth is larger than the current windowWidth
-      // since we've validated that at least one of the screen classes has a maxPixelWidth of `Infinity`, this is guaranteed to select a value
-      for (let i = 0; i < sortedScreenClassBreakpoints.length; ++i) {
-        const [screenClass, maxPixelWidth] = sortedScreenClassBreakpoints[i];
-
-        if (windowWidth <= maxPixelWidth) {
-          currentScreenClass = screenClass;
-          break;
-        }
-      }
-    }
-
-    return <Provider value={currentScreenClass}>{children}</Provider>;
+    return <Provider value={screenClass}>{children}</Provider>;
   };
 
   function useResponsiveProps<P extends {}>(props: ResponsiveProps<B, P>): P {
     const currentScreenClass = React.useContext(screenClassContext);
 
-    // optimize this error-check out of production builds
     if (currentScreenClass === undefined) {
+      // optimize this error-check out of production builds
       if (__DEV__) {
         throw new Error(
           "`useResponsiveProps` may only be used inside of a ScreenClassProvider. Make sure that you've rendered a ScreenClassProvider above this component your tree (usually folks render ScreenClassProvider near the root of their app)"
