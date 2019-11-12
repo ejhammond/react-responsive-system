@@ -166,7 +166,7 @@ const Button = props => {
 };
 ```
 
-> Tip: If you're using the hook with TypeScript, you may be interested in the `ResponsiveProps` type that's exported from the library. Have a look in the example folder, [here](https://github.com/tripphamm/react-responsive-system/blob/master/example/responsiveSystem.ts#L22) [and here](https://github.com/tripphamm/react-responsive-system/blob/master/example/componentUsingHook.tsx#L9)
+> Tip: If you're using the hook with TypeScript, you may be interested in the `ResponsiveProps` type that's exported from the library. Have a look in the example folder, [here](https://github.com/tripphamm/react-responsive-system/blob/master/example/responsiveSystem.ts#L22), [and here](https://github.com/tripphamm/react-responsive-system/blob/master/example/componentUsingHook.tsx#L9)
 
 ### `useScreenClass` Hook
 
