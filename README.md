@@ -172,10 +172,12 @@ const CustomComponent: React.FC<MyResponsiveProps<CustomComponentProps>> = props
   } = useResponsiveProps<CustomComponentProps>(props);
 ```
 
+## Server-Side Rendering
+
+If `react-responsive-system` cannot access the `window`, it will use the `defaultScreenClass` that you set in the configuration object. When the code is re-hydrated on the client, it will adjust to the actual screenClass.
+
 ## Under the Hood
 
 For folks who are curious about the implementation:
 
-Fundamentally, we need our components to be aware of the current screen class so they know when to re-render. We do this by setting up a single resize event-listener at the root of the app, and Providing the screen class via React Context.
-
-For better perf while your users are rapidly resizing their screens to see if your site breaks, there's a little debounce. You can configure the debounce delay by supplying a `resizeUpdateDelay` to the config object when you `createScreenClassProvider`.
+Fundamentally, we need our components to be aware of the current screen class so they know when to re-render. We do this by constructing Media Queries from your breakpoints and using `window.matchMedia` to observe changes, then we _provide_ the current screen class to components via React Context. This should only trigger a re-render when the screen class actually changes, and not during resizing events within the same screen class.
