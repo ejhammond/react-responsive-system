@@ -4,15 +4,17 @@ Make your components screen-size aware.
 
 Your app/website needs to handle different "classes" of screens. CSS can help to apply different styles for different screen classes, but why stop at styles?
 
-Let's say that you have a `Carousel` component that has a prop called `slidesToShow`. You might want to show 4 slides on large screens, but only 2 slides on smallish screens, and probably only 1 on a phone-sized device.
+Let's say that you have a `Carousel` component that has a prop called `slidesToShow`.
+
+You might want to show 4 slides on large screens, but only 2 slides on smallish screens, and probably only 1 on a phone-sized device.
 
 What if you could just write:
 
 ```jsx
 <Carousel
-  slidesToShow={4}
-  phone={{ slidesToShow: 1 }}
-  smallishScreen={{ slidesToShow: 2 }}
+  slidesToShow={4} // default to 4 slides
+  phone={{ slidesToShow: 1 }} // override props on `phone`s
+  smallishScreen={{ slidesToShow: 2 }} // override props on `smallishScreen`s
 />
 ```
 
@@ -22,7 +24,11 @@ That's exactly what Responsive System can do for you, and the best part is: you 
 
 ## Getting Started
 
-There are 3 steps to enabling this functionality in your components:
+1. [Define your breakpoints in JS](#define-your-breakpoints-in-JS)
+2. [Generate your custom Responsive System with `createResponsiveSystem`](#generate-your-custom-responsive-system-with-createResponsiveSystem)
+3. [Render the ScreenClassProvider near the root of your app](#render-the-ScreenClassProvider-near-the-root-of-your-app)
+4. [Wrap your comps with `responsive`](#wrap-your-comps-with-responsive)
+5.
 
 ### 1. Define your breakpoints in JS
 
@@ -39,10 +45,11 @@ const breakpoints = {
 
 The values that you provide are the "maximum pixel-widths" for that screen class. In order to make sure that all possible screen pixel-sizes are handled, there should be exactly one screen class with a value of `Infinity` which tells us that there is no maximum pixel-width for that screen class.
 
-### 2. Generate your customized utilities, and render/export the ScreenClassProvider
+### 2. Generate your custom Responsive System with `createResponsiveSystem`
 
-Here, you'll configure ResponsiveSystem with your
-Create a new file (recommended, but not required) called `responsiveSystem.js/ts` and configure the lib
+Here, you'll configure ResponsiveSystem with your breakpoints.
+
+Create a new file (recommended, but not required) called `responsiveSystem.js/ts` and configure the lib:
 
 ```js
 // responsiveSystem.js/ts
@@ -55,8 +62,7 @@ const breakpoints = {
 // generate the ResponsiveSystem pieces, and export them to be used throughout your app
 export const {
   ScreenClassProvider, // React Context Provider that supplies the current screen class to your comps
-  responsive, // a High-Order Component that can be used to make your comps responsive
-  useResponsiveProps, // a Hook that can be used to make your comps responsive
+  responsive, // wraps your component to make it responsive
 } = createResponsiveSystem({
   breakpoints,
   // this is the screenClass that will be used if we can't determine the width of the window (e.g. during SSR)
@@ -79,13 +85,9 @@ ReactDOM.render(
 );
 ```
 
-### 4. Make your comps responsive using the Hook or HOC
+### 4. Wrap your comps with `responsive`
 
-We provide both a HOC and a Hook for you to use. They both do the same thing (the HOC just adds the hook for you).
-
-#### `responsive` HOC
-
-Just wrap your comp in the `responsive` HOC and it will instantly understand your responsive props.
+Just wrap your comp in the `responsive` Higher-Order Component (HOC) and it will instantly understand your responsive props.
 
 ```js
 import { responsive } from '../responsiveSystem';
@@ -100,11 +102,42 @@ const Button = props => {
 export responsive(Button);
 ```
 
-#### `useResponsiveProps` Hook
+Don't like HOC's? You can use the [useResponsiveProps](#useResponsiveProps-hook) instead! The HOC uses the hook behind the scenes, so you'll get the same exact behavior either way.
+
+### Profit?
+
+You can now start adding Responsive System props to your component. Each key from your `breakpoints` will be a valid prop!
+
+```js
+<Button
+  buttonText="Default text"
+  sm={{ buttonText: 'Small screen text', buttonSize: 'mini' }}
+  lg={{ buttonText: 'Large screen text', buttonSize: 'large' }}
+/>
+```
+
+[See an example on GitHub](https://github.com/tripphamm/react-responsive-system/tree/master/example)
+
+## Goodies
+
+### `useResponsiveProps` Hook
+
+`responsive` takes your component, calls a React hook, and then returns your component with the proper screen-class-based props.
 
 If you prefer to use the Hook directly, you can do that too!
 
 ```js
+// responsiveSystem.js/ts
+
+// ...
+
+export const {
+  ScreenClassProvider,
+  useResponsiveProps, // export useResponsiveProps from your custom ResponsiveSystem
+} = createResponsiveSystem(...);
+
+// button.js/ts
+
 import { useResponsiveProps } from '../responsiveSystem';
 
 // before
@@ -122,19 +155,34 @@ const Button = props => {
 };
 ```
 
-### 5. Profit?
+> Tip: If you're using the Hook with TypeScript, you may be interested in the `ResponsiveProps` type that's exported from the library. [See an example](https://github.com/tripphamm/react-responsive-system/blob/master/example/responsiveSystem.ts#L19)
 
-Regardless of whether you chose the HOC or the Hook, you can now start adding Responsive System props to your component. Each key from your `breakpoints` will be a valid prop!
+### `useScreenClass` Hook
+
+Want direct access to the screen class itself? Sure! We're already providing it via context, so here's a hook to get the raw value for your own purposes!
 
 ```js
-<Button
-  buttonText="Default text"
-  sm={{ buttonText: 'Small screen text', buttonSize: 'mini' }}
-  lg={{ buttonText: 'Large screen text', buttonSize: 'large' }}
-/>
-```
+// responsiveSystem.js/ts
 
-[See an example on GitHub](https://github.com/tripphamm/react-responsive-system/tree/master/example)
+// ...
+
+export const {
+  ScreenClassProvider,
+  responsive,
+  useScreenClass, // export useScreenClass from your custom ResponsiveSystem
+} = createResponsiveSystem(...);
+
+// button.js/ts
+
+import { useScreenClass } from '../responsiveSystem';
+
+// after
+const Button = props => {
+  const screenClass = useScreenClass(); // e.g. "xs"/"sm"/"md" - it'll be a string representation of one of your breakpoints
+
+  // return ...
+};
+```
 
 ## Server-Side Rendering
 
