@@ -41,23 +41,34 @@ The values that you provide are the "maximum pixel-widths" for that screen class
 
 ### 2. Generate your customized utilities, and render/export the ScreenClassProvider
 
+Here, you'll configure ResponsiveSystem with your
+Create a new file (recommended, but not required) called `responsiveSystem.js/ts` and configure the lib
+
 ```js
-// at the root of your app
-import { createScreenClassProvider } from 'react-responsive-system';
+// responsiveSystem.js/ts
+import { createResponsiveSystem } from 'react-responsive-system';
 
 const breakpoints = {
   // your breakpoints here
 };
 
-// generate the custom Provider and a hook that will Consume it
-const { ScreenClassProvider, useResponsiveProps } = createScreenClassProvider({
+// generate the ResponsiveSystem pieces, and export them to be used throughout your app
+export const {
+  ScreenClassProvider, // React Context Provider that supplies the current screen class to your comps
+  responsive, // a High-Order Component that can be used to make your comps responsive
+  useResponsiveProps, // a Hook that can be used to make your comps responsive
+} = createResponsiveSystem({
   breakpoints,
   // this is the screenClass that will be used if we can't determine the width of the window (e.g. during SSR)
   defaultScreenClass: 'lg',
 });
+```
 
-// export the useResponsiveProps hook so that other components can use it
-export { useResponsiveProps };
+### 3. Render the ScreenClassProvider near the root of your app
+
+```js
+// index.jsx/tsx
+import { ScreenClassProvider } from './responsiveSystem';
 
 // render the ScreenClassProvider at (or near) the root of your app
 ReactDOM.render(
@@ -68,12 +79,33 @@ ReactDOM.render(
 );
 ```
 
-> Tip: if you're building a component library, you'll want to export the `ScreenClassProvider` for your users to render in their apps!
+### 4. Make your comps responsive using the Hook or HOC
 
-### 3. useResponsiveProps in your components
+We provide both a HOC and a Hook for you to use. They both do the same thing (the HOC just adds the hook for you).
+
+#### `responsive` HOC
+
+Just wrap your comp in the `responsive` HOC and it will instantly understand your responsive props.
 
 ```js
-import { useResponsiveProps } from '../index.js'; // or where ever you exported it from
+import { responsive } from '../responsiveSystem';
+
+// before
+const Button = props => {
+  const { buttonSize, buttonType, buttonText } = props;
+
+  // return ...
+};
+
+export responsive(Button);
+```
+
+#### `useResponsiveProps` Hook
+
+If you prefer to use the Hook directly, you can do that too!
+
+```js
+import { useResponsiveProps } from '../responsiveSystem';
 
 // before
 const Button = props => {
@@ -90,11 +122,9 @@ const Button = props => {
 };
 ```
 
-This is what I meant when I said that you could drop-in the functionality! All you need to do is replace `props` with `useResponsiveProps(props)`. The hook will consume the screenClass props e.g. `xs`, `sm`, `md` and will return a clean `props` that matches your existing API!
+### 5. Profit?
 
-### 4. Profit?
-
-Once you've completed those 3 steps, you can start adding Responsive System props to your component. Each key from your `breakpoints` will be a valid prop!
+Regardless of whether you chose the HOC or the Hook, you can now start adding Responsive System props to your component. Each key from your `breakpoints` will be a valid prop!
 
 ```js
 <Button
@@ -105,72 +135,6 @@ Once you've completed those 3 steps, you can start adding Responsive System prop
 ```
 
 [See an example on GitHub](https://github.com/tripphamm/react-responsive-system/tree/master/example)
-
-## TypeScript
-
-Everybody loves nice types. This lib was written with TypeScript, so utilities themselves are well-typed, but their types depend on the specific breakpoints that you've configured. Because of this, you'll want to "configure" the types before using them.
-
-Here are the two most useful types that we export:
-
-```ts
-/**
- * A union containing all of your custom screen classes
- */
-type ScreenClass<B extends ScreenClassBreakpoints> = keyof B;
-
-/**
- * A type that can be wrapped around your components' props in order to represent the new props that they have
- */
-type ResponsiveProps<B extends ScreenClassBreakpoints, P extends {}> = Omit<
-  P,
-  keyof B
-> &
-  {
-    [K in keyof B]?: Partial<P>;
-  };
-```
-
-As you can see, both of these types require you to provide your own custom breakpoints. So, you _could_ export your breakpoints and import them everywhere that you need to use one of these types, _or_ you could configure these types in one place and then re-export them!
-
-```ts
-import { ResponsiveProps, ScreenClass } from 'react-responsive-system';
-
-// at the root of your app
-const breakpoints = {
-  // your breakpoints here
-};
-
-export type MyResponsiveProps<P extends {}> = ResponsiveProps<
-  typeof breakpoints,
-  P
->;
-export type MyScreenClass = ScreenClass<typeof breakpoints>;
-```
-
-Now you can import MyResponsiveProps and MyScreenClass all over your app!
-
-Here's a fully-typed example for reference:
-
-```tsx
-import { ResponsiveProps } from 'react-responsive-system';
-
-const breakpoints = {
-  // your breakpoints here
-}
-
-type MyResponsiveProps<P extends {}> = ResponsiveProps<typeof breakpoints, P>;
-
-type CustomComponentProps = {
-  someColor?: string;
-  someText: string;
-};
-
-const CustomComponent: React.FC<MyResponsiveProps<CustomComponentProps>> = props => {
-  const {
-    someColor = '#000000',
-    someText = 'Unknown screen size',
-  } = useResponsiveProps<CustomComponentProps>(props);
-```
 
 ## Server-Side Rendering
 

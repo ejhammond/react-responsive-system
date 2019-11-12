@@ -96,7 +96,7 @@ export type ResponsiveProps<
 // ─── FACTORY ────────────────────────────────────────────────────────────────────
 //
 
-export function createScreenClassProvider<B extends ScreenClassBreakpoints>(
+export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
   screenClassConfiguration: ScreenClassConfiguration<B>
 ) {
   const { defaultScreenClass, breakpoints } = screenClassConfiguration;
@@ -248,8 +248,24 @@ export function createScreenClassProvider<B extends ScreenClassBreakpoints>(
     };
   }
 
+  function responsive<P extends {}>(Component: React.ComponentType<P>) {
+    const ResponsiveComponent: React.FC<ResponsiveProps<B, P>> = props => {
+      const responsiveProps = useResponsiveProps<P>(props);
+
+      return <Component {...responsiveProps} />;
+    };
+
+    ResponsiveComponent.displayName =
+      Component.displayName !== undefined
+        ? `Responsive(${Component.displayName})`
+        : 'ResponsiveComponent';
+
+    return ResponsiveComponent;
+  }
+
   return {
     ScreenClassProvider,
     useResponsiveProps,
+    responsive,
   };
 }

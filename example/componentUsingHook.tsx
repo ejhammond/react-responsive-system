@@ -6,9 +6,9 @@ type CustomComponentProps = {
   someText: string;
 };
 
-export const CustomComponent: React.FC<
-  Responsive<CustomComponentProps>
-> = props => {
+export const CustomComponentWithHook: React.FC<Responsive<
+  CustomComponentProps
+>> = props => {
   const {
     someColor = '#000000',
     someText = 'Default text',
