@@ -20,9 +20,23 @@ What if you could just write:
 
 The idea is: each of your components could have props that correspond to your own custom screen classes (maybe that's `mobile` and `desktop`, or maybe `sm`, `md`, `lg`). These props would contain any overrides that you want to apply to the component based on the screen class.
 
-In the example above, we have a screen class called `phone` and when we're on a `phone` sized scree, we override the `Carousel`s props so that only 1 slide is shown!
+In the example above, we have a screen class called `phone` and when we're on a `phone`-sized screen, we override the `Carousel`s props so that only 1 slide is shown! No conditional logic, no showing/hiding/swapping components, just a prop.
 
-That's what Responsive System can do for you, and the best part is: you can add this functionality to any component in a snap!
+This works great with existing component libraries / design systems!
+
+```jsx
+<Button
+  marginTop="large"
+  buttonStyle="link"
+  xs={{
+    marginTop: 'small',
+    buttonStyle: 'primary',
+    buttonWidth: 'full-width',
+  }}
+/>
+```
+
+No matter what props your component has, you can make them responsive with Responsive System, and the best part is: you can add this functionality to any component in a snap!
 
 ## Getting Started
 
