@@ -16,4 +16,7 @@ export const {
   breakpoints,
 });
 
+// ResponsiveProps takes 2 type args: the breakpoints, and the props
+// since the breakpoints will never change, we'll create a new type that just takes props as an arg
+// and it will always use the same breakpoints
 export type Responsive<P extends {}> = ResponsiveProps<typeof breakpoints, P>;

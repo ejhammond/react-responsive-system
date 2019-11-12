@@ -18,17 +18,18 @@ What if you could just write:
 />
 ```
 
-The idea is: each of your components could have props that correspond to your own custom screen classes (maybe that's `mobile` and `desktop`, or maybe `sm`, `md`. `lg`). These props would contain any overrides that you want to apply to the component based on the screen class.
+The idea is: each of your components could have props that correspond to your own custom screen classes (maybe that's `mobile` and `desktop`, or maybe `sm`, `md`, `lg`). These props would contain any overrides that you want to apply to the component based on the screen class.
 
-That's exactly what Responsive System can do for you, and the best part is: you can drop-in this solution to any existing component in a snap!
+In the example above, we have a screen class called `phone` and when we're on a `phone` sized scree, we override the `Carousel`s props so that only 1 slide is shown!
+
+That's what Responsive System can do for you, and the best part is: you can add this functionality to any component in a snap!
 
 ## Getting Started
 
-1. [Define your breakpoints in JS](#define-your-breakpoints-in-JS)
-2. [Generate your custom Responsive System with `createResponsiveSystem`](#generate-your-custom-responsive-system-with-createResponsiveSystem)
-3. [Render the ScreenClassProvider near the root of your app](#render-the-ScreenClassProvider-near-the-root-of-your-app)
-4. [Wrap your comps with `responsive`](#wrap-your-comps-with-responsive)
-5.
+1. [Define your breakpoints in JS](#1-define-your-breakpoints-in-JS)
+2. [Generate your custom Responsive System with `createResponsiveSystem`](#2-generate-your-custom-responsive-system-with-createresponsivesystem)
+3. [Render the ScreenClassProvider near the root of your app](#3-render-the-screenclassprovider-near-the-root-of-your-app)
+4. [Wrap your comps with `responsive`](#4-wrap-your-comps-with-responsive)
 
 ### 1. Define your breakpoints in JS
 
@@ -155,7 +156,7 @@ const Button = props => {
 };
 ```
 
-> Tip: If you're using the Hook with TypeScript, you may be interested in the `ResponsiveProps` type that's exported from the library. [See an example](https://github.com/tripphamm/react-responsive-system/blob/master/example/responsiveSystem.ts#L19)
+> Tip: If you're using the Hook with TypeScript, you may be interested in the `ResponsiveProps` type that's exported from the library. Have a look in the example folder, [here](https://github.com/tripphamm/react-responsive-system/blob/master/example/responsiveSystem.ts#L22) [and here](https://github.com/tripphamm/react-responsive-system/blob/master/example/componentUsingHook.tsx#L9)
 
 ### `useScreenClass` Hook
 
@@ -186,7 +187,7 @@ const Button = props => {
 
 ## Server-Side Rendering
 
-If `react-responsive-system` cannot access the `window`, it will use the `defaultScreenClass` that you set in the configuration object. When the code is re-hydrated on the client, it will adjust to the actual screenClass.
+If `react-responsive-system` cannot access the `window`, it will use the `defaultScreenClass` that you set in the configuration object. When the code is re-hydrated on the client, it will adjust to the actual screen class.
 
 ## Under the Hood
 
