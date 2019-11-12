@@ -111,7 +111,6 @@ Just wrap your comp in the `responsive` Higher-Order Component (HOC) and it will
 ```js
 import { responsive } from '../responsiveSystem';
 
-// before
 const Button = props => {
   const { buttonSize, buttonType, buttonText } = props;
 
@@ -148,7 +147,7 @@ If you prefer to use the hook directly, you can do that too!
 ```diff
 /* responsiveSystem.js/ts */
 
-// ... define breakpoints etc.
+...
 
 export const {
   ScreenClassProvider,
@@ -159,7 +158,6 @@ export const {
 
 + import { useResponsiveProps } from '../responsiveSystem';
 
-// before
 const Button = props => {
 - const { buttonSize, buttonType, buttonText } = props;
 + const { buttonSize, buttonType, buttonText } = useResponsiveProps(props);
