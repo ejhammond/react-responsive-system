@@ -1,5 +1,12 @@
 {
   "name": "react-responsive-system",
+  "keywords": [
+    "responsive",
+    "react",
+    "adaptive",
+    "design system",
+    "component library"
+  ],
   "version": "0.2.0",
   "license": "MIT",
   "author": "Tripp Hammond",
