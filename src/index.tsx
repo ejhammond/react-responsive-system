@@ -220,6 +220,23 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
     return <Provider value={screenClass}>{children}</Provider>;
   };
 
+  function useScreenClass(): keyof B {
+    const screenClass = React.useContext(screenClassContext);
+
+    if (screenClass === undefined) {
+      // optimize this error-check out of production builds
+      if (__DEV__) {
+        throw new Error(
+          "`useScreenClass` may only be used inside of a ScreenClassProvider. Make sure that you've rendered a ScreenClassProvider above this component your tree (usually folks render ScreenClassProvider near the root of their app). Returning the default screen class."
+        );
+      }
+
+      return defaultScreenClass;
+    }
+
+    return screenClass;
+  }
+
   function useResponsiveProps<P extends {}>(props: ResponsiveProps<B, P>): P {
     const currentScreenClass = React.useContext(screenClassContext);
 
@@ -227,7 +244,7 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
       // optimize this error-check out of production builds
       if (__DEV__) {
         throw new Error(
-          "`useResponsiveProps` may only be used inside of a ScreenClassProvider. Make sure that you've rendered a ScreenClassProvider above this component your tree (usually folks render ScreenClassProvider near the root of their app)"
+          "`useResponsiveProps` may only be used inside of a ScreenClassProvider. Make sure that you've rendered a ScreenClassProvider above this component your tree (usually folks render ScreenClassProvider near the root of their app). Returning the default props with no overrides."
         );
       }
 
@@ -266,6 +283,7 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
   return {
     ScreenClassProvider,
     useResponsiveProps,
+    useScreenClass,
     responsive,
   };
 }
