@@ -1,6 +1,6 @@
 # Responsive System
 
-Make your components screen-size aware.
+A new way to write responsive components.
 
 Your app/website needs to handle different "classes" of screens. CSS can help to apply different styles for different screen classes, but why stop at styles?
 
