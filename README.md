@@ -22,16 +22,20 @@ The idea is: each of your components could have props that correspond to your ow
 
 In the example above, we have a screen class called `phone` and when we're on a `phone`-sized screen, we override the `Carousel`s props so that only 1 slide is shown! No conditional logic, no showing/hiding/swapping components, just a prop.
 
-This works great with existing component libraries / design systems!
+Here's another example:
 
 ```jsx
-<Button
-  marginTop="large"
-  buttonStyle="link"
+import { Button } from '@material-ui/core/Button';
+
+const ResponsiveButton = responsive(Button);
+
+<ResponsiveButton
+  color="primary",
+  variant="outlined",
+  marginTop="2em",
   xs={{
-    marginTop: 'small',
-    buttonStyle: 'primary',
-    buttonWidth: 'full-width',
+    marginTop: "1em",
+    fullWidth: true,
   }}
 />
 ```
