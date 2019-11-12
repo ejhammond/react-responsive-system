@@ -1,4 +1,4 @@
-import { ResponsiveProps, createScreenClassProvider } from '../dist';
+import { ResponsiveProps, createResponsiveSystem } from '../dist';
 
 const breakpoints = {
   xs: 500,
@@ -10,7 +10,8 @@ const breakpoints = {
 export const {
   ScreenClassProvider,
   useResponsiveProps,
-} = createScreenClassProvider({
+  responsive,
+} = createResponsiveSystem({
   defaultScreenClass: 'lg',
   breakpoints,
 });
