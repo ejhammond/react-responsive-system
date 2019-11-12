@@ -71,7 +71,7 @@ Here, you'll configure ResponsiveSystem with your breakpoints.
 Create a new file (recommended, but not required) called `responsiveSystem.js/ts` and configure the lib:
 
 ```js
-// responsiveSystem.js/ts
+/* responsiveSystem.js/ts */
 import { createResponsiveSystem } from 'react-responsive-system';
 
 const breakpoints = {
@@ -92,7 +92,7 @@ export const {
 ### 3. Render the ScreenClassProvider near the root of your app
 
 ```js
-// index.jsx/tsx
+/* index.jsx/tsx */
 import { ScreenClassProvider } from './responsiveSystem';
 
 // render the ScreenClassProvider at (or near) the root of your app
@@ -121,13 +121,13 @@ const Button = props => {
 export responsive(Button);
 ```
 
-Don't like HOC's? You can use the [useResponsiveProps](#useResponsiveProps-hook) instead! The HOC uses the hook behind the scenes, so you'll get the same exact behavior either way.
+Don't like HOC's? You can use the [`useResponsiveProps` hook](#useResponsiveProps-hook)instead! The HOC uses the hook behind the scenes, so you'll get the exact same behavior either way.
 
 ### Profit?
 
 You can now start adding Responsive System props to your component. Each key from your `breakpoints` will be a valid prop!
 
-```js
+```jsx
 <Button
   buttonText="Default text"
   sm={{ buttonText: 'Small screen text', buttonSize: 'mini' }}
@@ -141,63 +141,57 @@ You can now start adding Responsive System props to your component. Each key fro
 
 ### `useResponsiveProps` Hook
 
-`responsive` takes your component, calls a React hook, and then returns your component with the proper screen-class-based props.
+The `responsive` HOC takes your component, calls this React hook, and then returns your component with the proper screen-class-based props.
 
-If you prefer to use the Hook directly, you can do that too!
+If you prefer to use the hook directly, you can do that too!
 
-```js
-// responsiveSystem.js/ts
+```diff
+/* responsiveSystem.js/ts */
 
-// ...
+// ... define breakpoints etc.
 
 export const {
   ScreenClassProvider,
-  useResponsiveProps, // export useResponsiveProps from your custom ResponsiveSystem
++ useResponsiveProps,
 } = createResponsiveSystem(...);
 
-// button.js/ts
+/* button.js/ts */
 
-import { useResponsiveProps } from '../responsiveSystem';
++ import { useResponsiveProps } from '../responsiveSystem';
 
 // before
 const Button = props => {
-  const { buttonSize, buttonType, buttonText } = props;
-
-  // return ...
-};
-
-// after
-const Button = props => {
-  const { buttonSize, buttonType, buttonText } = useResponsiveProps(props);
+- const { buttonSize, buttonType, buttonText } = props;
++ const { buttonSize, buttonType, buttonText } = useResponsiveProps(props);
 
   // return ...
 };
 ```
 
-> Tip: If you're using the Hook with TypeScript, you may be interested in the `ResponsiveProps` type that's exported from the library. Have a look in the example folder, [here](https://github.com/tripphamm/react-responsive-system/blob/master/example/responsiveSystem.ts#L22) [and here](https://github.com/tripphamm/react-responsive-system/blob/master/example/componentUsingHook.tsx#L9)
+> Tip: If you're using the hook with TypeScript, you may be interested in the `ResponsiveProps` type that's exported from the library. Have a look in the example folder, [here](https://github.com/tripphamm/react-responsive-system/blob/master/example/responsiveSystem.ts#L22) [and here](https://github.com/tripphamm/react-responsive-system/blob/master/example/componentUsingHook.tsx#L9)
 
 ### `useScreenClass` Hook
 
 Want direct access to the screen class itself? Sure! We're already providing it via context, so here's a hook to get the raw value for your own purposes!
 
-```js
-// responsiveSystem.js/ts
+```diff
+/* responsiveSystem.js/ts */
 
 // ...
 
 export const {
   ScreenClassProvider,
   responsive,
-  useScreenClass, // export useScreenClass from your custom ResponsiveSystem
++ useScreenClass,
 } = createResponsiveSystem(...);
 
-// button.js/ts
+/* button.js/ts */
 
-import { useScreenClass } from '../responsiveSystem';
++ import { useScreenClass } from '../responsiveSystem';
 
 // after
 const Button = props => {
-  const screenClass = useScreenClass(); // e.g. "xs"/"sm"/"md" - it'll be a string representation of one of your breakpoints
++ const screenClass = useScreenClass(); // e.g. "xs"/"sm"/"md" - it'll be a string representation of one of your breakpoints
 
   // return ...
 };
