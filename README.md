@@ -135,18 +135,13 @@ const breakpoints = {
   // your breakpoints here
 };
 
-// generate the ResponsiveSystem pieces, and export them to be used throughout your app
-export const {
-  // React Context Provider that supplies the current screen class to your comps
-  ScreenClassProvider,
-  // wraps your component to make it responsive
-  responsive,
-} = createResponsiveSystem({
+export const { ScreenClassProvider, responsive } = createResponsiveSystem({
   breakpoints,
-  // this is the screenClass that will be used if we can't determine the width of the window (e.g. during SSR)
   defaultScreenClass: 'lg',
 });
 ```
+
+Let's break this down a little bit. We're calling `createResponsiveSystem` with our own custom breakpoints, and it returns us a `ScreenClassProvider` (keeps track of the current screen class) and a function called `responsive` (makes your components responsive). We also provided a `defaultScreenClass` so that Responsive System knows which screen class to use when it can't find a `window` to measure (e.g. during SSR or headless testing). We immediately export both `ScreenClassProvider` and `responsive` so that we can use them across our app.
 
 ### 3. Render the ScreenClassProvider near the root of your app
 
@@ -155,7 +150,6 @@ export const {
 
 import { ScreenClassProvider } from './responsiveSystem';
 
-// render the ScreenClassProvider at (or near) the root of your app
 ReactDOM.render(
   <ScreenClassProvider>
     <App />
