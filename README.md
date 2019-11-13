@@ -65,7 +65,7 @@ The idea is: whenever you have a component that needs to render differently on d
 
 Here's where Responsive System comes in. We're trying to make it as easy as possible to use this pattern.
 
-We'll cover the set-up instructions in the next section, but here's a sneak-peak at how easy it will be to add this responsive functionality to an existing component:
+We'll cover the set-up instructions in the next section, but here's a sneak-peek at how easy it will be to add this responsive functionality to an existing component:
 
 ```jsx
 import { Button } from '@material-ui/core/Button';
