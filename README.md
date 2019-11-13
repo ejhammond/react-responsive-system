@@ -12,7 +12,9 @@ Let's say that you have a `Carousel` component that has a prop called `slidesToS
 
 You need to decide which value to select for this prop, but you quickly realize that the answer is different depending on how wide the screen is. You might want to show 4 slides on large screens, but only 2 slides on medium screens, and probably only 1 on a small, phone-sized device.
 
-![Carousel sizes](https://github.com/tripphamm/react-responsive-system/blob/master/readme-images/carousel-sizes.png)
+<div align="center">
+  <img alt="Carousel sizes" src="https://raw.githubusercontent.com/tripphamm/react-responsive-system/master/readme-images/carousel-sizes.png" />
+</div>
 
 How can we make that work?
 
