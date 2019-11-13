@@ -16,13 +16,13 @@ You need to decide which value to select for this prop, but you quickly realize 
 
 How can we make that work?
 
-Well, the first step is to decide exactly what we mean by "large", "medium", and "small". We need to decide the exact window-widths where we switch from one to the next. Commonly, these points are called _breakpoints_ and the ranges themselves ("large", "medium", "small") are called _screen classes_.
+Well, the first step is to decide exactly what we mean by "large", "medium", and "small". We need to decide the exact window-widths where we switch from one to the next. Commonly, these specific widths are called _breakpoints_ and the ranges themselves ("large", "medium", "small") are called _screen classes_.
 
-You probably knew that. In fact, your website/app probably already has a set of breakpoints and screen classes defined in its CSS. CSS supports _Media Queries_ which make it really easy to apply different styles to your website based on the size of the user's screen.
+You probably knew that. In fact, your website/app probably already has a set of breakpoints and screen classes defined in its CSS. In the world of modern web developments, we strive to make our websites _responsive_ so that they look good on any screen size, and defining your screen classes in CSS is often the first step toward making a responsive website.
 
-But `slidesToShow` is not a CSS style. We can't add a CSS rule that changes `slidesToShow` depending on the screen class. But we _can_ write a CSS rule that shows/hides an element based on the screen class!
+But... `slidesToShow` is not a CSS style, it's a property of a React component and it lives in a `.js` file. We can't add a CSS rule that changes `slidesToShow` depending on the screen class. To overcome this limitation, folks often write a CSS rule that shows/hides an element based on the screen class.
 
-So, how about this:
+Let's play that out.
 
 ```js
 <Carousel
@@ -39,13 +39,13 @@ So, how about this:
 />
 ```
 
-Oof. There are a few problems here. The first one is that we're actually shipping a lot of extra HTML/JS to our users; rather than a single `Carousel`, we're sending 3 `Carousel`s each with different props. The second issue is that this pattern is going to be really hard to maintain; having duplicate (triplicate) components all over your codebase is gonna be an eye-sore and it's error-prone because of the copy-pasting.
+Oof. There are a few problems here. The first one is that we're actually shipping a lot of extra HTML/JS to our users; rather than a single `Carousel`, we're sending 3 `Carousel`s each with different props. The second issue is that this pattern is going to be really hard to maintain; having duplicate (triplicate) components all over your codebase is gonna be an eye-sore and it's error-prone.
 
 We could solve the first issue by trying to detect the user's screen size before we send them the code, and then choosing the proper `Carousel` based on that info. But it turns out that detecting screen size is tougher than it sounds, and--besides--what if the user resizes their browser after you've made your decision?
 
 ## Solution
 
-Let's take a step back. We assumed that we needed to use CSS to change this prop, but that's actually not the case. If our Javascript was aware of the current screen class we'd know when to change the prop, and we wouldn't have to rely on showing/hiding with CSS at all!
+Let's take a step back. We assumed that we needed to use CSS to change this prop, but that's actually not the case. If our Javascript was aware of the current screen class, then we'd know when to change the prop, and we wouldn't have to rely CSS at all!
 
 Once our JS is aware of the screen class, we can write something like this instead:
 
@@ -59,7 +59,7 @@ Once our JS is aware of the screen class, we can write something like this inste
 
 One component. No server-side screen-size detection. Easy to read/maintain.
 
-The idea is: whenever you have a component that needs to render differently on different screen classes, you give it some extra props that correspond to your screen classes. Any values that you pass to those screen-class props will be applied as overrides when the screen reaches the appropriate size!
+The idea is: whenever you have a component that needs to render differently on different screen classes, you give it some extra props that correspond to your screen classes. Any values that you pass will be applied as overrides when the screen reaches the appropriate size!
 
 ## Responsive System
 
@@ -71,7 +71,7 @@ We'll cover the set-up instructions in the next section, but here's a sneak-peak
 import { Button } from '@material-ui/core/Button';
 
 // just pass your component to the `responsive` util
-// all of your breakpoint props are added
+// all of your screen classes are added as props
 // and the overrides will be handled automatically
 const ResponsiveButton = responsive(Button);
 
