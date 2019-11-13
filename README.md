@@ -18,13 +18,13 @@ How can we make that work?
 
 Well, the first step is to decide exactly what we mean by "large", "medium", and "small". We need to decide the exact window-widths where we switch from one to the next. Commonly, these specific widths are called _breakpoints_ and the ranges themselves ("large", "medium", "small") are called _screen classes_.
 
-You probably knew that. In fact, your website/app probably already has a set of breakpoints and screen classes defined in its CSS. In the world of modern web developments, we strive to make our websites _responsive_ so that they look good on any screen size, and defining your screen classes in CSS is often the first step toward making a responsive website.
+You probably knew that. In fact, your website/app probably already has a set of breakpoints and screen classes defined in its CSS. In the world of modern web development, we strive to make our websites _responsive_ so that they look good on any screen size, and defining your screen classes in CSS is often the first step toward making a responsive website.
 
 But... `slidesToShow` is not a CSS style, it's a property of a React component and it lives in a `.js` file. We can't add a CSS rule that changes `slidesToShow` depending on the screen class. To overcome this limitation, folks often write a CSS rule that shows/hides an element based on the screen class.
 
 Let's play that out.
 
-```js
+```jsx
 <Carousel
   slidesToShow={4}
   className="hidden-on-medium-screens hidden-on-small-screens"
@@ -39,7 +39,7 @@ Let's play that out.
 />
 ```
 
-Oof. There are a few problems here. The first one is that we're actually shipping a lot of extra HTML/JS to our users; rather than a single `Carousel`, we're sending 3 `Carousel`s each with different props. The second issue is that this pattern is going to be really hard to maintain; having duplicate (triplicate) components all over your codebase is gonna be an eye-sore and it's error-prone.
+Oof. There are a few problems here. The first one is that we're actually shipping a lot of extra HTML/JS to our users; rather than a single `Carousel`, we're sending 3 `Carousel`s each with different props. The second issue is that this pattern is going to be really hard to maintain; having duplicate (triplicate) components all over your codebase is gonna make your code hard to read and it's error-prone.
 
 We could solve the first issue by trying to detect the user's screen size before we send them the code, and then choosing the proper `Carousel` based on that info. But it turns out that detecting screen size is tougher than it sounds, and--besides--what if the user resizes their browser after you've made your decision?
 
@@ -103,9 +103,9 @@ yarn add react-responsive-system
 
 ### 1. Define your breakpoints in JS
 
-Create a new file (recommended, but not required) called `responsiveSystem.js/ts` and configure the lib.
+To keep things organized, folks often create a new file called `responsiveSystem.js/ts` where they'll configure Responsive System.
 
-The first step is to define your breakpoints in JS:
+No matter where you choose to keep the configuration, the first step is to define your breakpoints in JS:
 
 ```js
 /* responsiveSystem.js/ts */
@@ -166,7 +166,7 @@ ReactDOM.render(
 
 ### 4. Wrap your comps with `responsive`
 
-Just wrap your comp in the `responsive` Higher-Order Component (HOC) and it will instantly understand your responsive props.
+Now, whenever you come across a situation where a component needs to use different props depending on the screen class, just wrap the component in the `responsive` Higher-Order Component (HOC) and it will instantly understand your responsive props!
 
 ```js
 import { responsive } from '../responsiveSystem';
@@ -180,11 +180,7 @@ const Button = props => {
 export responsive(Button);
 ```
 
-Don't like HOC's? You can use the [`useResponsiveProps` hook](#useresponsiveprops-hook) instead! The HOC uses the hook behind the scenes, so you'll get the exact same behavior either way.
-
-### Profit?
-
-You can now start adding Responsive System props to your component. Each key from your `breakpoints` will be a valid prop!
+And then when you use it, each key from your `breakpoints` will be a valid prop!
 
 ```jsx
 <Button
@@ -194,15 +190,15 @@ You can now start adding Responsive System props to your component. Each key fro
 />
 ```
 
-[See an example on GitHub](https://github.com/tripphamm/react-responsive-system/tree/master/example)
+Don't like HOC's? You can use the [`useResponsiveProps` hook](#useresponsiveprops-hook) instead! The HOC uses the hook behind the scenes, so you'll get the exact same behavior either way.
+
+[See a full example on GitHub](https://github.com/tripphamm/react-responsive-system/tree/master/example)
 
 ## Goodies
 
 ### `useResponsiveProps` Hook
 
-The `responsive` HOC takes your component, calls this React hook, and then returns your component with the proper screen-class-based props.
-
-If you prefer to use the hook directly, you can do that too!
+The `responsive` HOC takes your component, calls this React hook, and then returns your component with the proper screen-class-based props. If you're using the `responsive` HOC, then you don't need to worry about this hook at all, but if you prefer to use the hook directly, feel free!
 
 ```jsx
 /* responsiveSystem.js/ts */
@@ -227,7 +223,7 @@ const Button = props => {
 };
 ```
 
-`useResponsiveProps` takes in a props object that contains your screen class overrides, and it will return a clean `props` that matches your component's existing API.
+`useResponsiveProps` takes in a `props` that contains your screen class overrides, and it will return a clean `props` that matches your component's existing API.
 
 > Tip: If you're using the hook with TypeScript, you may be interested in the `ResponsiveProps` type that's exported from the library. Have a look in the example folder: [here](https://github.com/tripphamm/react-responsive-system/blob/master/example/responsiveSystem.ts#L22), [and here](https://github.com/tripphamm/react-responsive-system/blob/master/example/componentUsingHook.tsx#L9)
 
