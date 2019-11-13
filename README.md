@@ -44,7 +44,7 @@ No matter what props your component has, you can make them responsive with Respo
 
 ## Getting Started
 
-1. [Define your breakpoints in JS](#1-define-your-breakpoints-in-JS)
+1. [Define your breakpoints in JS](#1-define-your-breakpoints-in-js)
 2. [Generate your custom Responsive System with `createResponsiveSystem`](#2-generate-your-custom-responsive-system-with-createresponsivesystem)
 3. [Render the ScreenClassProvider near the root of your app](#3-render-the-screenclassprovider-near-the-root-of-your-app)
 4. [Wrap your comps with `responsive`](#4-wrap-your-comps-with-responsive)
