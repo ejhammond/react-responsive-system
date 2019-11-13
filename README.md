@@ -12,6 +12,8 @@ Let's say that you have a `Carousel` component that has a prop called `slidesToS
 
 You need to decide which value to select for this prop, but you quickly realize that the answer is different depending on how wide the screen is. You might want to show 4 slides on large screens, but only 2 slides on medium screens, and probably only 1 on a small, phone-sized device.
 
+![Carousel sizes](https://github.com/tripphamm/react-responsive-system/blob/master/readme-images/carousel-sizes.png)
+
 How can we make that work?
 
 Well, the first step is to decide exactly what we mean by "large", "medium", and "small". We need to decide the exact window-widths where we switch from one to the next. Commonly, these points are called _breakpoints_ and the ranges themselves ("large", "medium", "small") are called _screen classes_.
