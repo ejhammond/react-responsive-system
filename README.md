@@ -120,7 +120,7 @@ const Button = props => {
 export responsive(Button);
 ```
 
-Don't like HOC's? You can use the [`useResponsiveProps` hook](#useResponsiveProps-hook)instead! The HOC uses the hook behind the scenes, so you'll get the exact same behavior either way.
+Don't like HOC's? You can use the [`useResponsiveProps` hook](#useResponsiveProps-hook) instead! The HOC uses the hook behind the scenes, so you'll get the exact same behavior either way.
 
 ### Profit?
 
