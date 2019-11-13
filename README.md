@@ -2,47 +2,97 @@
 
 A new way to write responsive components.
 
-Your app/website needs to handle different "classes" of screens. CSS can help to apply different styles for different screen classes, but why stop at styles?
+## Quick Start
+
+If you're in a hurry, you can jump to [Getting Started](#getting-started)!
+
+## The Problem
 
 Let's say that you have a `Carousel` component that has a prop called `slidesToShow`.
 
-You might want to show 4 slides on large screens, but only 2 slides on smallish screens, and probably only 1 on a phone-sized device.
+You need to decide which value to select for this prop, but you quickly realize that the answer is different depending on how wide the screen is. You might want to show 4 slides on large screens, but only 2 slides on medium screens, and probably only 1 on a small, phone-sized device.
 
-What if you could just write:
+How can we make that work?
 
-```jsx
+Well, the first step is to decide exactly what we mean by "large", "medium", and "small". We need to decide the exact window-widths where we switch from one to the next. Commonly, these points are called _breakpoints_ and the ranges themselves ("large", "medium", "small") are called _screen classes_.
+
+You probably knew that. In fact, your website/app probably already has a set of breakpoints and screen classes defined in its CSS. CSS supports _Media Queries_ which make it really easy to apply different styles to your website based on the size of the user's screen.
+
+But `slidesToShow` is not a CSS style. We can't add a CSS rule that changes `slidesToShow` depending on the screen class. But we _can_ write a CSS rule that shows/hides an element based on the screen class!
+
+So, how about this:
+
+```js
 <Carousel
-  slidesToShow={4} // default to 4 slides
-  phone={{ slidesToShow: 1 }} // override props on `phone`s
-  smallishScreen={{ slidesToShow: 2 }} // override props on `smallishScreen`s
+  slidesToShow={4}
+  className="hidden-on-medium-screens hidden-on-small-screens"
+/>
+<Carousel
+  slidesToShow={2}
+  className="hidden-on-large-screens hidden-on-small-screens"
+/>
+<Carousel
+  slidesToShow={1}
+  className="hidden-on-large-screens hidden-on-medium-screens"
 />
 ```
 
-The idea is: each of your components could have props that correspond to your own custom screen classes (maybe that's `mobile` and `desktop`, or maybe `sm`, `md`, `lg`). These props would contain any overrides that you want to apply to the component based on the screen class.
+Oof. There are a few problems here. The first one is that we're actually shipping a lot of extra HTML/JS to our users; rather than a single `Carousel`, we're sending 3 `Carousel`s each with different props. The second issue is that this pattern is going to be really hard to maintain; having duplicate (triplicate) components all over your codebase is gonna be an eye-sore and it's error-prone because of the copy-pasting.
 
-In the example above, we have a screen class called `phone` and when we're on a `phone`-sized screen, we override the `Carousel`s props so that only 1 slide is shown! No conditional logic, no showing/hiding/swapping components, just a prop.
+We could solve the first issue by trying to detect the user's screen size before we send them the code, and then choosing the proper `Carousel` based on that info. But it turns out that detecting screen size is tougher than it sounds, and--besides--what if the user resizes their browser after you've made your decision?
 
-Here's another example:
+## Solution
+
+Let's take a step back. We assumed that we needed to use CSS to change this prop, but that's actually not the case. If our Javascript was aware of the current screen class we'd know when to change the prop, and we wouldn't have to rely on showing/hiding with CSS at all!
+
+Once our JS is aware of the screen class, we can write something like this instead:
+
+```jsx
+<Carousel
+  slidesToShow={1} // default to 1 slide
+  medium={{ slidesToShow: 2 }} // override props on `medium` screens
+  large={{ slidesToShow: 4 }} // override props on `large` screens
+/>
+```
+
+One component. No server-side screen-size detection. Easy to read/maintain.
+
+The idea is: whenever you have a component that needs to render differently on different screen classes, you give it some extra props that correspond to your screen classes. Any values that you pass to those screen-class props will be applied as overrides when the screen reaches the appropriate size!
+
+## Responsive System
+
+Here's where Responsive System comes in. We're trying to make it as easy as possible to use this pattern.
+
+We'll cover the set-up instructions in the next section, but here's a sneak-peak at how easy it will be to add this responsive functionality to an existing component:
 
 ```jsx
 import { Button } from '@material-ui/core/Button';
 
+// just pass your component to the `responsive` util
+// all of your breakpoint props are added
+// and the overrides will be handled automatically
 const ResponsiveButton = responsive(Button);
 
 <ResponsiveButton
   color="primary",
   variant="outlined",
   marginTop="2em",
-  xs={{
+  small={{
     marginTop: "1em",
     fullWidth: true,
   }}
 />
 ```
 
-No matter what props your component has, you can make them responsive with Responsive System, and the best part is: you can add this functionality to any component in a snap!
-
 ## Getting Started
+
+```bash
+# npm
+npm install react-responsive-system
+
+#yarn
+yarn add react-responsive-system
+```
 
 1. [Define your breakpoints in JS](#1-define-your-breakpoints-in-js)
 2. [Generate your custom Responsive System with `createResponsiveSystem`](#2-generate-your-custom-responsive-system-with-createresponsivesystem)
@@ -51,7 +101,13 @@ No matter what props your component has, you can make them responsive with Respo
 
 ### 1. Define your breakpoints in JS
 
+Create a new file (recommended, but not required) called `responsiveSystem.js/ts` and configure the lib.
+
+The first step is to define your breakpoints in JS:
+
 ```js
+/* responsiveSystem.js/ts */
+
 const breakpoints = {
   xs: 500, // 0 - 500px -> "xs"
   sm: 750, // 501 - 750px -> "sm"
@@ -68,10 +124,9 @@ The values that you provide are the "maximum pixel-widths" for that screen class
 
 Here, you'll configure ResponsiveSystem with your breakpoints.
 
-Create a new file (recommended, but not required) called `responsiveSystem.js/ts` and configure the lib:
-
 ```js
 /* responsiveSystem.js/ts */
+
 import { createResponsiveSystem } from 'react-responsive-system';
 
 const breakpoints = {
@@ -80,8 +135,10 @@ const breakpoints = {
 
 // generate the ResponsiveSystem pieces, and export them to be used throughout your app
 export const {
-  ScreenClassProvider, // React Context Provider that supplies the current screen class to your comps
-  responsive, // wraps your component to make it responsive
+  // React Context Provider that supplies the current screen class to your comps
+  ScreenClassProvider,
+  // wraps your component to make it responsive
+  responsive,
 } = createResponsiveSystem({
   breakpoints,
   // this is the screenClass that will be used if we can't determine the width of the window (e.g. during SSR)
@@ -93,6 +150,7 @@ export const {
 
 ```js
 /* index.jsx/tsx */
+
 import { ScreenClassProvider } from './responsiveSystem';
 
 // render the ScreenClassProvider at (or near) the root of your app
