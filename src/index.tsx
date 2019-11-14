@@ -134,7 +134,7 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
     // we don't need the first value in the tuples, so we leave that slot empty
     // it looks a bit odd, but it's correct and doesn't introduce additional variables that we won't use
   ).sort(([, maxPixelWidth1], [, maxPixelWidth2]) => {
-    return maxPixelWidth1 < maxPixelWidth2 ? 1 : 0;
+    return maxPixelWidth1 > maxPixelWidth2 ? 1 : 0;
   });
 
   const sortedScreenClasses = sortedScreenClassBreakpoints.map(
@@ -185,6 +185,7 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
 
           const mediaQuery = constraints.join(' and ');
 
+          console.log('calling match media with query', mediaQuery);
           const mediaQueryList = window.matchMedia(mediaQuery);
 
           // in order to set the correct initial state, we need to immediately check each mql
