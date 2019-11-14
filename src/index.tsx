@@ -185,7 +185,6 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
 
           const mediaQuery = constraints.join(' and ');
 
-          console.log('calling match media with query', mediaQuery);
           const mediaQueryList = window.matchMedia(mediaQuery);
 
           // in order to set the correct initial state, we need to immediately check each mql
