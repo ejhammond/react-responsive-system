@@ -47,7 +47,6 @@ const expectedMediaQueries: { [K in keyof typeof breakpoints]: string } = {
 
 function setupEnv(screenClass: keyof typeof breakpoints) {
   window.matchMedia = jest.fn().mockImplementation(query => {
-    console.log('query', query);
     // assert that every media query that we try to match is an "expected" media query
     // @ts-ignore
     expect(query).toBeInList(Object.values(expectedMediaQueries));
