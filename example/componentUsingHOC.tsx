@@ -23,4 +23,6 @@ const CustomComponent: React.FC<CustomComponentProps> = props => {
   );
 };
 
+CustomComponent.displayName = 'CustomComponent';
+
 export const CustomComponentWithHOC = responsive(CustomComponent);
