@@ -4,13 +4,14 @@ import { render } from '@testing-library/react';
 import { createResponsiveSystem, ResponsiveProps } from '../src';
 
 expect.extend({
-  toBeInList(received, list) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  toBeInList(received: any, list: any[]) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const pass = list.some((item: any) => Object.is(received, item));
 
     if (pass) {
       return {
-        message: () =>
-          `expected ${received} not to be in [${list.join(' , ')}]`,
+        message: () => `expected ${received} not to be in [${list.join(' , ')}]`,
         pass: true,
       };
     } else {
@@ -29,11 +30,7 @@ const breakpoints = {
   lg: Infinity,
 };
 
-const {
-  ScreenClassProvider,
-  responsive,
-  useResponsiveProps,
-} = createResponsiveSystem({
+const { ScreenClassProvider, responsive, useResponsiveProps } = createResponsiveSystem({
   breakpoints,
   defaultScreenClass: 'lg',
 });
@@ -46,9 +43,8 @@ const expectedMediaQueries: { [K in keyof typeof breakpoints]: string } = {
 };
 
 function setupEnv(screenClass: keyof typeof breakpoints) {
-  window.matchMedia = jest.fn().mockImplementation(query => {
+  window.matchMedia = jest.fn().mockImplementation((query) => {
     // assert that every media query that we try to match is an "expected" media query
-    // @ts-ignore
     expect(query).toBeInList(Object.values(expectedMediaQueries));
 
     return {
@@ -65,25 +61,22 @@ function setupEnv(screenClass: keyof typeof breakpoints) {
   });
 }
 
-const ResponsiveCompWithHOC = responsive(
-  (props: React.PropsWithChildren<{ text: string }>) => (
-    <div data-testid="hoc-comp">{props.text}</div>
-  )
-);
+const ResponsiveCompWithHOC = responsive((props: React.PropsWithChildren<{ text: string }>) => (
+  <div data-testid="hoc-comp">{props.text}</div>
+));
 
-const ResponsiveCompWithHook: React.FC<ResponsiveProps<
-  typeof breakpoints,
-  { text: string }
->> = props => {
+const ResponsiveCompWithHook: React.FC<ResponsiveProps<typeof breakpoints, { text: string }>> = (
+  props,
+) => {
   const responsiveProps = useResponsiveProps(props);
 
   return <div data-testid="hook-comp">{responsiveProps.text}</div>;
 };
 
-function test(screenClass: keyof typeof breakpoints) {
+function testScreenClass(screenClass: keyof typeof breakpoints) {
   setupEnv(screenClass);
 
-  const { queryByTestId } = render(
+  const { getByTestId } = render(
     <ScreenClassProvider>
       <ResponsiveCompWithHOC
         text="default"
@@ -99,23 +92,28 @@ function test(screenClass: keyof typeof breakpoints) {
         md={{ text: 'md' }}
         lg={{ text: 'lg' }}
       />
-    </ScreenClassProvider>
+    </ScreenClassProvider>,
   );
 
-  expect(queryByTestId('hoc-comp')).toBeTruthy();
-  expect(queryByTestId('hoc-comp')!.innerHTML).toBe(screenClass);
-  expect(queryByTestId('hook-comp')).toBeTruthy();
-  expect(queryByTestId('hook-comp')!.innerHTML).toBe(screenClass);
+  expect(getByTestId('hoc-comp')).toBeTruthy();
+  expect(getByTestId('hoc-comp').innerHTML).toBe(screenClass);
+  expect(getByTestId('hook-comp')).toBeTruthy();
+  expect(getByTestId('hook-comp').innerHTML).toBe(screenClass);
 }
+
+/* jest eslint gets mad because there's no `expect` in the test body
+ * but that's just because we've abstracted the expects out to a function
+ */
+/* eslint-disable jest/expect-expect */
 
 describe('it', () => {
   it('overrides on min screen class', () => {
-    test('xs');
+    testScreenClass('xs');
   });
   it('overrides on middle screen class', () => {
-    test('sm');
+    testScreenClass('sm');
   });
   it('overrides on max screen class', () => {
-    test('lg');
+    testScreenClass('lg');
   });
 });

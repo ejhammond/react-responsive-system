@@ -7,11 +7,7 @@ const breakpoints = {
   lg: Infinity,
 };
 
-export const {
-  ScreenClassProvider,
-  useResponsiveProps,
-  responsive,
-} = createResponsiveSystem({
+export const { ScreenClassProvider, useResponsiveProps, responsive } = createResponsiveSystem({
   defaultScreenClass: 'lg',
   breakpoints,
 });

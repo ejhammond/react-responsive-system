@@ -24,22 +24,12 @@
     "start": "tsdx watch",
     "build": "tsdx build",
     "test": "tsdx test --env=jsdom",
-    "lint": "tsdx lint",
-    "release": "yarn build && yarn publish"
+    "lint": "tk-lint",
+    "format": "tk-format",
+    "release": "yarn build && yarn test && tk-release"
   },
   "peerDependencies": {
     "react": ">=16.8"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "tsdx lint"
-    }
-  },
-  "prettier": {
-    "printWidth": 80,
-    "semi": true,
-    "singleQuote": true,
-    "trailingComma": "es5"
   },
   "devDependencies": {
     "@testing-library/react": "^9.3.2",
@@ -49,6 +39,7 @@
     "husky": "^3.0.9",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
+    "trippkit": "../trippkit",
     "tsdx": "^0.11.0",
     "tslib": "^1.10.0",
     "typescript": "^3.7.2"

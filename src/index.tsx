@@ -10,10 +10,10 @@ const windowExists = typeof window === 'object';
 /**
  * Omits the given keys from the given object
  */
-export default function omit<
-  T extends { [key: string]: any },
-  K extends keyof T
->(obj: T, omittedKeys: K[]): Omit<T, K> {
+export default function omit<T extends { [key: string]: any }, K extends keyof T>(
+  obj: T,
+  omittedKeys: K[],
+): Omit<T, K> {
   // TypeScript assigns the return type, string[] - we are asserting that the return type keyof T
   const allKeys = Object.keys(obj) as (keyof T)[];
 
@@ -21,8 +21,7 @@ export default function omit<
     // `omittedKeys.indexOf` expects an input of type K extends keyof T
     // `key` is type keyof T, but for some reason TypeScript is freaking out
     // idk.
-    // @ts-ignore
-    const shouldOmit = omittedKeys.indexOf(key) !== -1;
+    const shouldOmit = omittedKeys.indexOf(key as K) !== -1;
 
     if (!shouldOmit) {
       // assert that if we got this far, `key` must be one of the keys that _does not_ exist in K
@@ -84,10 +83,7 @@ export type ScreenClassConfiguration<B extends ScreenClassBreakpoints> = {
 
 export type ScreenClass<B extends ScreenClassBreakpoints> = keyof B;
 
-export type ResponsiveProps<
-  B extends ScreenClassBreakpoints,
-  P extends {}
-> = Omit<P, keyof B> &
+export type ResponsiveProps<B extends ScreenClassBreakpoints, P extends {}> = Omit<P, keyof B> &
   {
     [K in keyof B]?: Partial<P>;
   };
@@ -97,7 +93,7 @@ export type ResponsiveProps<
 //
 
 export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
-  screenClassConfiguration: ScreenClassConfiguration<B>
+  screenClassConfiguration: ScreenClassConfiguration<B>,
 ) {
   const { defaultScreenClass, breakpoints } = screenClassConfiguration;
 
@@ -113,13 +109,13 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
     const breakpointValues = Object.values(breakpoints);
     if (breakpointValues.length < 2) {
       throw new Error(
-        'ScreenClassConfigurationError - `breakpoints` must have at least 2 keys e.g. `{ mobile: 320, desktop: Infinity }`'
+        'ScreenClassConfigurationError - `breakpoints` must have at least 2 keys e.g. `{ mobile: 320, desktop: Infinity }`',
       );
     }
 
-    if (breakpointValues.filter(value => value === Infinity).length !== 1) {
+    if (breakpointValues.filter((value) => value === Infinity).length !== 1) {
       throw new Error(
-        'ScreenClassConfigurationError - `breakpoints` must have exactly 1 entry with a value of `Infinity` for the maximum pixel-width e.g. `{ mobile: 320, desktop: Infinity }`'
+        'ScreenClassConfigurationError - `breakpoints` must have exactly 1 entry with a value of `Infinity` for the maximum pixel-width e.g. `{ mobile: 320, desktop: Infinity }`',
       );
     }
   }
@@ -130,24 +126,20 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
 
   // sort the screen classes from smallest -> largest (will make it easier to determine the proper screen class given a window-width later)
   const sortedScreenClassBreakpoints: [keyof B, number][] = Object.entries(
-    breakpoints
+    breakpoints,
     // we don't need the first value in the tuples, so we leave that slot empty
     // it looks a bit odd, but it's correct and doesn't introduce additional variables that we won't use
   ).sort(([, maxPixelWidth1], [, maxPixelWidth2]) => {
     return maxPixelWidth1 > maxPixelWidth2 ? 1 : 0;
   });
 
-  const sortedScreenClasses = sortedScreenClassBreakpoints.map(
-    ([screenClass]) => screenClass
-  );
+  const sortedScreenClasses = sortedScreenClassBreakpoints.map(([screenClass]) => screenClass);
 
   //
   // ─── CONTEXT ────────────────────────────────────────────────────────────────────
   //
 
-  const screenClassContext = React.createContext<ScreenClass<B> | undefined>(
-    undefined
-  );
+  const screenClassContext = React.createContext<ScreenClass<B> | undefined>(undefined);
 
   //
   // ─── PROVIDER ───────────────────────────────────────────────────────────────────
@@ -156,9 +148,7 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
   const { Provider } = screenClassContext;
 
   const ScreenClassProvider: React.FC = ({ children }) => {
-    const [screenClass, setScreenClass] = React.useState<keyof B>(
-      defaultScreenClass
-    );
+    const [screenClass, setScreenClass] = React.useState<keyof B>(defaultScreenClass);
 
     React.useLayoutEffect(() => {
       if (!windowExists) {
@@ -166,14 +156,10 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
       }
 
       // build the media queries
-      const screenClassMediaQueries: [
-        keyof B,
-        MediaQueryList
-      ][] = sortedScreenClassBreakpoints.map(
+      const screenClassMediaQueries: [keyof B, MediaQueryList][] = sortedScreenClassBreakpoints.map(
         ([screenClass, maxWidthPx], index) => {
           // the minWidth for this screenClass is the maxWidth of the previous breakpoint + 1
-          const minWidthPx =
-            index > 0 ? sortedScreenClassBreakpoints[index - 1][1] + 1 : 0;
+          const minWidthPx = index > 0 ? sortedScreenClassBreakpoints[index - 1][1] + 1 : 0;
 
           const constraints: string[] = [];
           if (minWidthPx !== 0) {
@@ -193,17 +179,14 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
           }
 
           return [screenClass, mediaQueryList];
-        }
+        },
       );
 
-      type MediaQueryListListener = (
-        this: MediaQueryList,
-        event: MediaQueryListEvent
-      ) => any;
+      type MediaQueryListListener = (this: MediaQueryList, event: MediaQueryListEvent) => any;
 
       const listeners: [MediaQueryList, MediaQueryListListener][] = [];
       screenClassMediaQueries.forEach(([screenClass, mediaQuery]) => {
-        const listener: MediaQueryListListener = event => {
+        const listener: MediaQueryListListener = (event) => {
           if (event.matches) {
             setScreenClass(screenClass);
           }
@@ -227,7 +210,7 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
       // optimize this error-check out of production builds
       if (__DEV__) {
         throw new Error(
-          "`useScreenClass` may only be used inside of a ScreenClassProvider. Make sure that you've rendered a ScreenClassProvider above this component your tree (usually folks render ScreenClassProvider near the root of their app). Returning the default screen class."
+          "`useScreenClass` may only be used inside of a ScreenClassProvider. Make sure that you've rendered a ScreenClassProvider above this component your tree (usually folks render ScreenClassProvider near the root of their app). Returning the default screen class.",
         );
       }
 
@@ -244,7 +227,7 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
       // optimize this error-check out of production builds
       if (__DEV__) {
         throw new Error(
-          "`useResponsiveProps` may only be used inside of a ScreenClassProvider. Make sure that you've rendered a ScreenClassProvider above this component your tree (usually folks render ScreenClassProvider near the root of their app). Returning the default props with no overrides."
+          "`useResponsiveProps` may only be used inside of a ScreenClassProvider. Make sure that you've rendered a ScreenClassProvider above this component your tree (usually folks render ScreenClassProvider near the root of their app). Returning the default props with no overrides.",
         );
       }
 
@@ -266,7 +249,7 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
   }
 
   function responsive<P extends {}>(Component: React.ComponentType<P>) {
-    const ResponsiveComponent: React.FC<ResponsiveProps<B, P>> = props => {
+    const ResponsiveComponent: React.FC<ResponsiveProps<B, P>> = (props) => {
       const responsiveProps = useResponsiveProps<P>(props);
 
       return <Component {...responsiveProps} />;
