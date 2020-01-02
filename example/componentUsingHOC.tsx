@@ -6,7 +6,7 @@ type CustomComponentProps = {
   someText: string;
 };
 
-const CustomComponent: React.FC<CustomComponentProps> = props => {
+const CustomComponent: React.FC<CustomComponentProps> = (props) => {
   const { someColor = '#000000', someText = 'Default text' } = props;
 
   return (

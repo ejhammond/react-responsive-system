@@ -6,13 +6,10 @@ type CustomComponentProps = {
   someText: string;
 };
 
-export const CustomComponentWithHook: React.FC<Responsive<
-  CustomComponentProps
->> = props => {
-  const {
-    someColor = '#000000',
-    someText = 'Default text',
-  } = useResponsiveProps<CustomComponentProps>(props);
+export const CustomComponentWithHook: React.FC<Responsive<CustomComponentProps>> = (props) => {
+  const { someColor = '#000000', someText = 'Default text' } = useResponsiveProps<
+    CustomComponentProps
+  >(props);
 
   return (
     <div

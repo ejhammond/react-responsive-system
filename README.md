@@ -156,7 +156,7 @@ ReactDOM.render(
   <ScreenClassProvider>
     <App />
   </ScreenClassProvider>,
-  document.getElementById('root')
+  document.getElementById('root'),
 );
 ```
 
