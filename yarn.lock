@@ -8939,10 +8939,10 @@ trim-off-newlines@^1.0.0:
   resolved "https://registry.yarnpkg.com/trim-off-newlines/-/trim-off-newlines-1.0.1.tgz#9f9ba9d9efa8764c387698bcbfeb2c848f11adb3"
   integrity sha1-n5up2e+odkw4dpi8v+sshI8RrbM=
 
-trippkit@^1.1.2:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/trippkit/-/trippkit-1.1.2.tgz#69cca699f98ba72c9b5a3d42a45b9c742bf3e6d5"
-  integrity sha512-JE6bqhikeseMk4SEOWn89IJy0SHR5jqt/YKX0R2CpFCp2758FQiAyySCifKy8VsosMj5Fa5wjzeTPbg+fCK6Ig==
+trippkit@^1.1.4:
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/trippkit/-/trippkit-1.1.4.tgz#917bb547d361c08166934751bb09d1f405ccf1e0"
+  integrity sha512-CEKQOGCsgOHKJTI/no8kCMJTPHw942x4/iHs/Rv/FGP5u62GMAKbiLYC+w/Rb2HsGdo85Z6E13PzMXFWR/8nSQ==
   dependencies:
     "@babel/core" "^7.5.0"
     "@semantic-release/git" "^7.0.18"
