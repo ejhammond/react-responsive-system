@@ -1,24 +1,13 @@
-# Javascript Node CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-javascript/ for more details
-#
 version: 2
 jobs:
-  build:
-    context: Semantic Release
+  release:
     docker:
       - image: circleci/node:10.15
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/mongo:3.4.4
-
     working_directory: ~/repo
 
     steps:
       - checkout
 
-      # Download and cache dependencies
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "package.json" }}
@@ -33,3 +22,12 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
 
       - run: yarn release
+workflows:
+  version: 2
+  release-workflow:
+    jobs:
+      - release:
+          context: semantic-release
+          filters:
+            branches:
+              only: master
