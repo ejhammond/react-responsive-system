@@ -5,6 +5,7 @@
 version: 2
 jobs:
   build:
+    context: Semantic Release
     docker:
       - image: circleci/node:10.15
       # Specify service dependencies here if necessary
