@@ -1,3 +1,3 @@
 /* eslint-env commonjs */
 
-module.exports = require('trippkit/configs/lint-staged');
+module.exports = require('@tripphamm/trippkit/configs/lint-staged');

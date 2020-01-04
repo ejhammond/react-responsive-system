@@ -1,1 +1,1 @@
-module.exports = require('trippkit/configs/husky');
+module.exports = require('@tripphamm/trippkit/configs/husky');

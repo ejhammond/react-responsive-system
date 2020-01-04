@@ -33,13 +33,13 @@
   },
   "devDependencies": {
     "@testing-library/react": "^9.3.2",
+    "@tripphamm/trippkit": "^1.2.2",
     "@types/jest": "^24.0.22",
     "@types/react": "^16.9.11",
     "@types/react-dom": "^16.9.4",
     "husky": "^3.0.9",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
-    "trippkit": "^1.1.4",
     "tsdx": "^0.11.0",
     "tslib": "^1.10.0",
     "typescript": "^3.7.2"
