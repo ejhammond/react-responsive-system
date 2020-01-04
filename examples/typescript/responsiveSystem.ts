@@ -1,4 +1,4 @@
-import { ResponsiveProps, createResponsiveSystem } from '../dist';
+import { ResponsiveProps, createResponsiveSystem } from 'react-responsive-system';
 
 const breakpoints = {
   xs: 500,
