@@ -4270,11 +4270,6 @@ react-app-polyfill@^1.0.0:
     regenerator-runtime "0.13.3"
     whatwg-fetch "3.0.0"
 
-react-responsive-system@^0.5.1:
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/react-responsive-system/-/react-responsive-system-0.5.1.tgz#66ca1f9859a5c2bbc3e627442dcb39e7967d353c"
-  integrity sha512-uyTq+bWVcnbt8NGtsG89EXHp8BItqxEXL3ZW90rDAfo7qYcaf9eXSxbjIkw7jS0YUfKftQS5j/qbEhWuMyqtYA==
-
 readable-stream@^2.0.2, readable-stream@^2.0.6, readable-stream@^2.2.2, readable-stream@^2.3.3, readable-stream@^2.3.6, readable-stream@~2.3.3, readable-stream@~2.3.6:
   version "2.3.6"
   resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-2.3.6.tgz#b11c27d88b8ff1fbe070643cf94b0c79ae1b0aaf"

@@ -3,4 +3,5 @@ module.exports = {
   globals: {
     __DEV__: 'readonly',
   },
+  rules: { '@typescript-eslint/ban-ts-ignore': 'off' },
 };

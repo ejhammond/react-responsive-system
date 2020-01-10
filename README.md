@@ -2,72 +2,11 @@
 
 A new way to write responsive components.
 
-## Quick Start
+## Motivation
 
-If you're in a hurry, you can jump to [Getting Started](#getting-started)!
-
-## The Problem
-
-Let's say that you have a `Carousel` component that has a prop called `slidesToShow`.
-
-You need to decide which value to select for this prop, but you quickly realize that the answer is different depending on how wide the screen is. You might want to show 4 slides on large screens, but only 2 slides on medium screens, and probably only 1 on a small, phone-sized device.
-
-<div align="center">
-  <img alt="Carousel sizes" src="https://raw.githubusercontent.com/tripphamm/react-responsive-system/master/readme-images/carousel-sizes.png" />
-</div>
-
-How can we make that work?
-
-Well, the first step is to decide exactly what we mean by "large", "medium", and "small". We need to decide the exact window-widths where we switch from one to the next. Commonly, these specific widths are called _breakpoints_ and the ranges themselves ("large", "medium", "small") are called _screen classes_.
-
-You probably knew that. In fact, your website/app probably already has a set of breakpoints and screen classes defined in its CSS. In the world of modern web development, we strive to make our websites _responsive_ so that they look good on any screen size, and defining your screen classes in CSS is often the first step toward making a responsive website.
-
-But... `slidesToShow` is not a CSS style, it's a property of a React component and it lives in a `.js` file. We can't add a CSS rule that changes `slidesToShow` depending on the screen class. To overcome this limitation, folks often write a CSS rule that shows/hides an element based on the screen class.
-
-Let's play that out.
-
-```jsx
-<Carousel
-  slidesToShow={4}
-  className="hidden-on-medium-screens hidden-on-small-screens"
-/>
-<Carousel
-  slidesToShow={2}
-  className="hidden-on-large-screens hidden-on-small-screens"
-/>
-<Carousel
-  slidesToShow={1}
-  className="hidden-on-large-screens hidden-on-medium-screens"
-/>
-```
-
-Oof. There are a few problems here. The first one is that we're actually shipping a lot of extra HTML/JS to our users; rather than a single `Carousel`, we're sending 3 `Carousel`s each with different props. The second issue is that this pattern is going to be really hard to maintain; having duplicate (triplicate) components all over your codebase is gonna make your code hard to read and it's error-prone.
-
-We could solve the first issue by trying to detect the user's screen size before we send them the code, and then choosing the proper `Carousel` based on that info. But it turns out that detecting screen size is tougher than it sounds, and--besides--what if the user resizes their browser after you've made your decision?
-
-## Solution
-
-Let's take a step back. We assumed that we needed to use CSS to change this prop, but that's actually not the case. If our Javascript was aware of the current screen class, then we'd know when to change the prop, and we wouldn't have to rely CSS at all!
-
-Once our JS is aware of the screen class, we can write something like this instead:
-
-```jsx
-<Carousel
-  slidesToShow={1} // default to 1 slide
-  medium={{ slidesToShow: 2 }} // override props on `medium` screens
-  large={{ slidesToShow: 4 }} // override props on `large` screens
-/>
-```
-
-One component. No server-side screen-size detection. Easy to read/maintain.
-
-The idea is: whenever you have a component that needs to render differently on different screen classes, you give it some extra props that correspond to your screen classes. Any values that you pass will be applied as overrides when the screen reaches the appropriate size!
+Check out this [post](https://tripps.tips/responsive-react-components/)
 
 ## Responsive System
-
-Here's where Responsive System comes in. We're trying to make it as easy as possible to use this pattern.
-
-We'll cover the set-up instructions in the next section, but here's a sneak-peek at how easy it will be to add this responsive functionality to an existing component:
 
 ```jsx
 import { Button } from '@material-ui/core/Button';
@@ -248,6 +187,78 @@ const Button = props => {
 
   // return ...
 };
+```
+
+### Custom Merge Function
+
+By default, `react-responsive-system` will apply any screen-size-specific overrides right on top of your base props, but sometimes you need more control over how your overrides are applied.
+
+Let's say you've got a component that accepts an object as a prop. The intrinsic `style` prop is a great example!
+
+```jsx
+// component accepts an object as a prop
+<div style={{ height: 100, backgroundColor: 'black' }}>
+```
+
+We can make a `div` responsive with `react-responsive-system`:
+
+```js
+const ResponsiveDiv = responsive('div');
+```
+
+And we can override the style on `small` screens.
+
+```jsx
+<ResponsiveDiv
+  style={{ height: 100, backgroundColor: 'black' }}
+  small={{ style: { backgroundColor: 'blue' } }}
+/>
+```
+
+In this case, we might want to override the `backgroundColor` but to leave the `height` alone. But, by default the `small.style` is going to completely override the base `style` and the result on small screens will effectively be:
+
+```jsx
+// bummer...
+<div style={{ backgroundColor: 'blue' }}>
+```
+
+We can fix this by providing a `function` as a prop rather than an object. The function will be invoked with the base props as an argument so that you can have full control over how the overrides are handled.
+
+```js
+<ResponsiveDiv
+  style={{ height: 100, backgroundColor: 'black' }}
+  small={(baseProps) => {
+    return {
+      ...baseProps,
+      style: { ...baseProps.style, backgroundColor: 'blue' },
+    };
+  }}
+/>
+```
+
+And voila! Your overrides are applied on your terms.
+
+#### Optimizing
+
+Pro tip: if you've got a bunch of screen classes that all need to perform custom overrides in the same way, you can create a helper function.
+
+```jsx
+function makeOverrideFn(overrides) {
+  // function that returns a function!
+  return (baseProps) => {
+    return {
+      ...baseProps,
+      style: { ...baseProps.style, ...overrides },
+    };
+  };
+}
+
+<ResponsiveDiv
+  style={{ height: 100, backgroundColor: 'black' }}
+  small={makeOverrideFn({ backgroundColor: 'blue' })}
+  medium={makeOverrideFn({ backgroundColor: 'green' })}
+  large={makeOverrideFn({ backgroundColor: 'purple' })}
+/>;
 ```
 
 ## Server-Side Rendering

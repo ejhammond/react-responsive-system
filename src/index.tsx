@@ -85,7 +85,7 @@ export type ScreenClass<B extends ScreenClassBreakpoints> = keyof B;
 
 export type ResponsiveProps<B extends ScreenClassBreakpoints, P extends {}> = Omit<P, keyof B> &
   {
-    [K in keyof B]?: Partial<P>;
+    [K in keyof B]?: Partial<P> | ((baseProps: P) => P);
   };
 
 //
@@ -240,20 +240,60 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
     // ─── DETERMINE PROPS ─────────────────────────────────────────────
     //
 
-    return {
-      // TypeScript: this is correct, but TS is having trouble confirming that it will be type P
-      ...(omit(props, sortedScreenClasses) as P),
-      // any props that are specified for the current screen class will trump all other props
-      ...(props[currentScreenClass] !== undefined && props[currentScreenClass]),
-    };
+    // TypeScript: this is correct, but TS is having trouble confirming that it will be type P
+    const baseProps = omit(props, sortedScreenClasses) as P;
+    const overrides =
+      props[currentScreenClass] !== undefined ? props[currentScreenClass] : ({} as Partial<P>);
+
+    if (typeof overrides === 'function') {
+      return overrides(baseProps);
+    }
+
+    return { ...baseProps, ...overrides };
   }
 
-  function responsive<P extends {}>(Component: React.ComponentType<P>) {
-    const ResponsiveComponent: React.FC<ResponsiveProps<B, P>> = (props) => {
+  // In order to support refs, we need to use forwardRef
+  // but technically refs can't be forwarded to Function Components
+  // so we produce overloaded signatures so that TS will yell at folks
+  // who try to use the ref prop if they passed us a Function Component
+  // our implementation will always pass the ref to the given component (even if it's a Function Component)
+  // but React won't complain about it if the ref is undefined.
+  // It's not possible (afaik) to detect a Function Component vs ForwardRef vs Class
+  // so we can't dynamically call forwardRef depending on that context
+  // so we're relying on TS overrides to block devs from defining the ref
+  // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/35834
+
+  // Host Components (e.g. "div") have refs defined by JSX.IntrinsicElements
+  // @ts-ignore
+  function responsive<K extends keyof JSX.IntrinsicElements>(
+    Component: K,
+  ): React.ForwardRefExoticComponent<ResponsiveProps<B, JSX.IntrinsicElements[K]>>;
+
+  // Class Component refs hold the instance of the class
+  function responsive<T extends React.ComponentClass<any>>(
+    Component: T,
+  ): React.ForwardRefExoticComponent<
+    ResponsiveProps<B, React.ComponentPropsWithoutRef<T> & { ref?: React.Ref<InstanceType<T>> }>
+  >;
+
+  // ForwardRef Components have a ref as a prop
+  function responsive<P extends { ref?: React.Ref<any> }>(
+    Component: React.ForwardRefExoticComponent<P>,
+  ): React.ForwardRefExoticComponent<ResponsiveProps<B, P>>;
+
+  // Function Components don't have refs
+  function responsive<P>(
+    Component: React.FunctionComponent<P>,
+  ): React.ForwardRefExoticComponent<ResponsiveProps<B, P>>;
+
+  // Implementation - just forwardRef to everything
+  function responsive<P>(Component: React.ComponentType<P>) {
+    // @ts-ignore
+    const ResponsiveComponent = React.forwardRef((props: ResponsiveProps<B, P>, ref) => {
       const responsiveProps = useResponsiveProps<P>(props);
 
-      return <Component {...responsiveProps} />;
-    };
+      return <Component ref={ref} {...responsiveProps} />;
+    });
 
     ResponsiveComponent.displayName =
       Component.displayName !== undefined
