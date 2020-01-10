@@ -4,14 +4,15 @@ A new way to write responsive components.
 
 ## Motivation
 
-Check out this [post](https://tripps.tips/responsive-react-components/)
+Check out this [post](https://tripps.tips/responsive-react-components/) to learn more about the motivation behind Responsive System.
 
-## Responsive System
+## Sneak Peek
 
 ```jsx
+// works with _any_ component at all
 import { Button } from '@material-ui/core/Button';
 
-// just pass your component to the `responsive` util
+// just pass the component to the `responsive` util
 // all of your screen classes are added as props
 // and the overrides will be handled automatically
 const ResponsiveButton = responsive(Button);
@@ -21,6 +22,7 @@ const ResponsiveButton = responsive(Button);
   variant="outlined",
   marginTop="2em",
   small={{
+    // overrides applied on "small" screens
     marginTop: "1em",
     fullWidth: true,
   }}
@@ -33,7 +35,7 @@ const ResponsiveButton = responsive(Button);
 # npm
 npm install react-responsive-system
 
-#yarn
+# yarn
 yarn add react-responsive-system
 ```
 
@@ -46,7 +48,7 @@ yarn add react-responsive-system
 
 To keep things organized, folks often create a new file called `responsiveSystem.js/ts` where they'll configure Responsive System.
 
-No matter where you choose to keep the configuration, the first step is to define your breakpoints in JS:
+But, no matter where you choose to keep the configuration, the first step is to define your breakpoints in JS:
 
 ```js
 /* responsiveSystem.js/ts */
@@ -82,7 +84,9 @@ export const { ScreenClassProvider, responsive } = createResponsiveSystem({
 });
 ```
 
-Let's break this down a little bit. We're calling `createResponsiveSystem` with our own custom breakpoints, and it returns us a `ScreenClassProvider` (keeps track of the current screen class) and a function called `responsive` (makes your components responsive). We also provided a `defaultScreenClass` so that Responsive System knows which screen class to use when it can't find a `window` to measure (e.g. during SSR or headless testing). We immediately export both `ScreenClassProvider` and `responsive` so that we can use them across our app.
+Let's break this down a little bit.
+
+We're calling `createResponsiveSystem` with our own custom breakpoints, and we get back a `ScreenClassProvider` (keeps track of the current screen class) and a function called `responsive` (makes your components responsive). We also provided a `defaultScreenClass` so that Responsive System knows which screen class to use when it can't find a `window` to measure (e.g. during SSR or headless testing). We immediately export both `ScreenClassProvider` and `responsive` so that we can use them across our app.
 
 ### 3. Render the ScreenClassProvider near the root of your app
 
@@ -105,29 +109,126 @@ Now, whenever you come across a situation where a component needs to use differe
 
 ```js
 import { responsive } from '../responsiveSystem';
+import Button from './components/Button';
+
+const ResponsiveButton = responsive(Button);
+
+// now you can use any of the props from Button
+// AND you get extra props based on your breakpoints
+<ResponsiveButton
+  onClick={() => alert('Clicked!')}
+  xs={{ onClick: () => alert('Clicked on an extra small screen!') }}
+/>;
+```
+
+If you want your component to be responsive all the time, you can export the responsive version rather than wrapping it each time.
+
+```jsx
+// your-app/components/Button.js
+
+import { responsive } from '../responsiveSystem';
 
 const Button = props => {
   const { buttonSize, buttonType, buttonText } = props;
 
-  // return ...
+  // return <button>...
 };
 
+// just add responsive() around your export
 export responsive(Button);
 ```
 
-And then when you use it, each key from your `breakpoints` will be a valid prop!
+And now it will be responsive everywhere you use it!
 
 ```jsx
+// already responsive!
+import Button from './components/Button';
+
 <Button
   buttonText="Default text"
   sm={{ buttonText: 'Small screen text', buttonSize: 'mini' }}
   lg={{ buttonText: 'Large screen text', buttonSize: 'large' }}
+/>;
+```
+
+> Don't like HOC's? You can use the [`useResponsiveProps` hook](#useresponsiveprops-hook) instead! The HOC uses the hook behind the scenes, so you'll get the exact same behavior either way.
+
+## Examples
+
+[TypeScript](https://github.com/tripphamm/react-responsive-system/tree/master/examples/typescript)
+[Gatsby](https://github.com/tripphamm/react-responsive-system/tree/master/examples/gatsby)
+
+## Custom Merge Function
+
+By default, Responsive System will apply any screen-size-specific overrides right on top of your base props, but sometimes you need more control over how your overrides are applied.
+
+Let's say you've got a component that accepts an `object` as a prop. The intrinsic `style` prop is a great example!
+
+```jsx
+// component accepts an object as a prop
+<div style={{ height: 100, backgroundColor: 'black' }}>
+```
+
+We can make a `div` responsive with Responsive System:
+
+```js
+const ResponsiveDiv = responsive('div');
+```
+
+And we can override the style on `small` screens.
+
+```jsx
+<ResponsiveDiv
+  style={{ height: 100, backgroundColor: 'black' }}
+  small={{ style: { backgroundColor: 'blue' } }}
 />
 ```
 
-Don't like HOC's? You can use the [`useResponsiveProps` hook](#useresponsiveprops-hook) instead! The HOC uses the hook behind the scenes, so you'll get the exact same behavior either way.
+In this case, we might want to override the `backgroundColor` but to leave the `height` alone. But, by default the `small.style` is going to completely override the base `style` and the result on small screens will effectively be:
 
-[See a full example on GitHub](https://github.com/tripphamm/react-responsive-system/tree/master/example)
+```jsx
+// no height! Bummer...
+<div style={{ backgroundColor: 'blue' }}>
+```
+
+We can fix this by providing a `function` as a prop rather than an object. The function will be invoked with the base props as an argument so that you can have full control over how the overrides are handled.
+
+```js
+<ResponsiveDiv
+  style={{ height: 100, backgroundColor: 'black' }}
+  small={(baseProps) => {
+    return {
+      ...baseProps,
+      style: { ...baseProps.style, backgroundColor: 'blue' },
+    };
+  }}
+/>
+```
+
+And voila! Your overrides are applied on your terms.
+
+### Optimizing
+
+Pro tip: if you've got a bunch of screen classes that all need to perform custom overrides in the same way, you can create a helper function.
+
+```jsx
+function makeOverrideFn(overrides) {
+  // function that returns a function!
+  return (baseProps) => {
+    return {
+      ...baseProps,
+      style: { ...baseProps.style, ...overrides },
+    };
+  };
+}
+
+<ResponsiveDiv
+  style={{ height: 100, backgroundColor: 'black' }}
+  small={makeOverrideFn({ backgroundColor: 'blue' })}
+  medium={makeOverrideFn({ backgroundColor: 'green' })}
+  large={makeOverrideFn({ backgroundColor: 'purple' })}
+/>;
+```
 
 ## Goodies
 
@@ -160,7 +261,7 @@ const Button = props => {
 
 `useResponsiveProps` takes in a `props` that contains your screen class overrides, and it will return a clean `props` that matches your component's existing API.
 
-> Tip: If you're using the hook with TypeScript, you may be interested in the `ResponsiveProps` type that's exported from the library. Have a look in the example folder: [here](https://github.com/tripphamm/react-responsive-system/blob/master/example/responsiveSystem.ts#L22), [and here](https://github.com/tripphamm/react-responsive-system/blob/master/example/componentUsingHook.tsx#L9)
+> Tip: If you're using the hook with TypeScript, you may be interested in the `ResponsiveProps` type that's exported from the library. Have a look in the example folder: [here](https://github.com/tripphamm/react-responsive-system/blob/master/examples/typescript/responsiveSystem.ts#L18), [and here](https://github.com/tripphamm/react-responsive-system/blob/master/examples/typescript/componentUsingHook.tsx#L9)
 
 ### `useScreenClass` Hook
 
@@ -187,78 +288,6 @@ const Button = props => {
 
   // return ...
 };
-```
-
-### Custom Merge Function
-
-By default, `react-responsive-system` will apply any screen-size-specific overrides right on top of your base props, but sometimes you need more control over how your overrides are applied.
-
-Let's say you've got a component that accepts an object as a prop. The intrinsic `style` prop is a great example!
-
-```jsx
-// component accepts an object as a prop
-<div style={{ height: 100, backgroundColor: 'black' }}>
-```
-
-We can make a `div` responsive with `react-responsive-system`:
-
-```js
-const ResponsiveDiv = responsive('div');
-```
-
-And we can override the style on `small` screens.
-
-```jsx
-<ResponsiveDiv
-  style={{ height: 100, backgroundColor: 'black' }}
-  small={{ style: { backgroundColor: 'blue' } }}
-/>
-```
-
-In this case, we might want to override the `backgroundColor` but to leave the `height` alone. But, by default the `small.style` is going to completely override the base `style` and the result on small screens will effectively be:
-
-```jsx
-// bummer...
-<div style={{ backgroundColor: 'blue' }}>
-```
-
-We can fix this by providing a `function` as a prop rather than an object. The function will be invoked with the base props as an argument so that you can have full control over how the overrides are handled.
-
-```js
-<ResponsiveDiv
-  style={{ height: 100, backgroundColor: 'black' }}
-  small={(baseProps) => {
-    return {
-      ...baseProps,
-      style: { ...baseProps.style, backgroundColor: 'blue' },
-    };
-  }}
-/>
-```
-
-And voila! Your overrides are applied on your terms.
-
-#### Optimizing
-
-Pro tip: if you've got a bunch of screen classes that all need to perform custom overrides in the same way, you can create a helper function.
-
-```jsx
-function makeOverrideFn(overrides) {
-  // function that returns a function!
-  return (baseProps) => {
-    return {
-      ...baseProps,
-      style: { ...baseProps.style, ...overrides },
-    };
-  };
-}
-
-<ResponsiveDiv
-  style={{ height: 100, backgroundColor: 'black' }}
-  small={makeOverrideFn({ backgroundColor: 'blue' })}
-  medium={makeOverrideFn({ backgroundColor: 'green' })}
-  large={makeOverrideFn({ backgroundColor: 'purple' })}
-/>;
 ```
 
 ## Server-Side Rendering
