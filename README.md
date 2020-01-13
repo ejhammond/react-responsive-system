@@ -146,8 +146,8 @@ import Button from './components/Button';
 
 <Button
   buttonText="Default text"
-  sm={{ buttonText: 'Small screen text', buttonSize: 'mini' }}
-  lg={{ buttonText: 'Large screen text', buttonSize: 'large' }}
+  sm={{ buttonText: 'Small screen text', buttonSize: 'large' }}
+  lg={{ buttonText: 'Large screen text', buttonSize: 'normal' }}
 />;
 ```
 
@@ -157,6 +157,86 @@ import Button from './components/Button';
 
 [TypeScript](https://github.com/tripphamm/react-responsive-system/tree/master/examples/typescript)
 [Gatsby](https://github.com/tripphamm/react-responsive-system/tree/master/examples/gatsby)
+
+## Cascading
+
+By default, Responsive System overrides do not cascade, which is to say: if you add an override for screen class `X`, those overrides will only be applied when the user's browser/device matches screen class `X`. But in some cases, you might want to apply overrides on `X` and also anything larger/smaller than `X`.
+
+This is where `cascadeMode` comes in.
+
+Let's take an example. We'll assume that we have 4 screen classes, "xs", "sm", "md", and "lg" and that we have a `Button` component that can be either `normal` or `large`. On most screen sizes, we want our button to be `normal` size, but on `xs` screens (like mobile phones) we want to make the button nice and big so that it's easier to tap.
+
+There are 2 ways that you can do this with the default configuration of Responsive System:
+
+```jsx
+<Button
+  // default is "normal"
+  buttonSize="normal"
+  // override on xs screens
+  xs={{ buttonSize: 'large' }}
+/>
+```
+
+This approach is called "desktop-first" because the default values pertain to larger screens, and we provide overrides for smaller screens.
+
+We could also write this in a "mobile-first" way like this:
+
+```jsx
+<Button
+  // default to "large"
+  buttonSize="large"
+  // override on sm, md, and lg screens
+  sm={{ buttonSize: 'normal' }}
+  md={{ buttonSize: 'normal' }}
+  lg={{ buttonSize: 'normal' }}
+/>
+```
+
+In this particular case, the "desktop-first" approach is shorter and easier to understand, but sometimes the reverse will be true. Using the default `cascadeMode` ("no-cascade") allows you to choose which approach works best on a case-by-case basis. You pick your default values and then apply overrides for any screen sizes that need special treatment.
+
+For folks who find value in having a consistent "desktop-first" or "mobile-first" approach throughout their apps, we also provide `cascadeMode = "desktop-first"` and `cascadeMode = "mobile-first"`. In these modes, you always provide default values for either your largest screen class ("desktop-first") or your smallest ("mobile-first") and your overrides will _cascade_.
+
+Going back to our example, if we had used `cascadeMode = "desktop-first"` we would still write:
+
+```jsx
+<Button
+  // desktop-first default value
+  buttonSize="normal"
+  // override on xs screens AND anything smaller
+  xs={{ buttonSize: 'large' }}
+/>
+```
+
+The desktop-first cascade would automatically add our overrides on any screen classes smaller that `xs`, but no such screen classes exist, so the cascade doesn't come into play here.
+
+On the other hand, if we had used `cascadeMode = "mobile-first"`, we could take advantage of the mobile-first cascade:
+
+```jsx
+<Button
+  // mobile-first default value
+  buttonSize="large"
+  // override on sm AND anything larger
+  sm={{ buttonSize: 'normal' }}
+/>
+```
+
+The mobile-first cascade says "apply these overrides on _this_ screen class _and_ any larger screen classes too".
+
+Put another way:
+
+- "no-cascade" - `sm` overrides apply only on `sm` screens
+- "desktop-first" - `sm` overrides apply on `sm` and `xs` screens
+- "mobile-first" = `sm` overrides apply on `sm`, `md`, and `lg`
+
+If you'd like to enable desktop/mobile-first cascading, you can pass the `cascadeMode` option to `createResponsiveSystem`.
+
+```js
+export const { ScreenClassProvider, responsive } = createResponsiveSystem({
+  breakpoints,
+  defaultScreenClass: 'lg',
+  cascadeMode: 'mobile-first', // or "desktop-first"
+});
+```
 
 ## Custom Merge Function
 

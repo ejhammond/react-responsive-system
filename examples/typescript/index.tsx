@@ -21,37 +21,26 @@ const App = () => {
       <FunctionComponentWithHOC
         someColor="#000000"
         someText="overridden"
-        xs={{ someColor: 'rebeccapurple', someText: 'xs' }}
         sm={{ someColor: 'palevioletred', someText: 'sm' }}
         md={{ someColor: 'brown', someText: 'md' }}
-        lg={{ someColor: 'green', someText: 'lg' }}
       />
       <ForwardRefComponentWithHOC
         ref={forwardRefCompRef}
         someColor="#000000"
         someText="overridden"
-        xs={{ someColor: 'rebeccapurple', someText: 'xs' }}
         sm={{ someColor: 'palevioletred', someText: 'sm' }}
         md={{ someColor: 'brown', someText: 'md' }}
-        lg={{ someColor: 'green', someText: 'lg' }}
       />
       <ClassComponentWithHOC
         ref={classCompRef}
         someColor="#000000"
         someText="overridden"
-        xs={{ someColor: 'rebeccapurple', someText: 'xs' }}
         sm={{ someColor: 'palevioletred', someText: 'sm' }}
         md={{ someColor: 'brown', someText: 'md' }}
-        lg={{ someColor: 'green', someText: 'lg' }}
       />
       <HostComponentWithHOC
         ref={hostCompRef}
         style={{ color: 'white', height: 100, width: 100, backgroundColor: '#000000' }}
-        xs={(baseProps) => ({
-          ...baseProps,
-          style: { ...baseProps.style, backgroundColor: 'rebeccapurple' },
-          children: 'xs',
-        })}
         sm={(baseProps) => ({
           ...baseProps,
           style: { ...baseProps.style, backgroundColor: 'palevioletred' },
@@ -62,19 +51,14 @@ const App = () => {
           style: { ...baseProps.style, backgroundColor: 'brown' },
           children: 'md',
         })}
-        lg={(baseProps) => ({
-          ...baseProps,
-          style: { ...baseProps.style, backgroundColor: 'green' },
-          children: 'lg',
-        })}
-      />
+      >
+        overridden
+      </HostComponentWithHOC>
       <CustomComponentWithHook
         someColor="#000000"
         someText="overridden"
-        xs={{ someColor: 'rebeccapurple', someText: 'xs' }}
         sm={{ someColor: 'palevioletred', someText: 'sm' }}
         md={{ someColor: 'brown', someText: 'md' }}
-        lg={{ someColor: 'green', someText: 'lg' }}
       />
     </ScreenClassProvider>
   );

@@ -79,6 +79,17 @@ export type ScreenClassConfiguration<B extends ScreenClassBreakpoints> = {
    * }
    */
   breakpoints: B;
+
+  /**
+   * Controls the way that overrides are applied
+   *
+   * "no-cascade" -> only apply overrides on the exact screen class
+   * "mobile-first" -> override on matching screen class and larger
+   * "desktop-first" -> override on matching screen class and smaller
+   *
+   * @default "no-cascade"
+   */
+  cascadeMode?: 'no-cascade' | 'mobile-first' | 'desktop-first';
 };
 
 export type ScreenClass<B extends ScreenClassBreakpoints> = keyof B;
@@ -95,7 +106,7 @@ export type ResponsiveProps<B extends ScreenClassBreakpoints, P extends {}> = Om
 export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
   screenClassConfiguration: ScreenClassConfiguration<B>,
 ) {
-  const { defaultScreenClass, breakpoints } = screenClassConfiguration;
+  const { defaultScreenClass, breakpoints, cascadeMode = 'no-cascade' } = screenClassConfiguration;
 
   //
   // ─── VALIDATE ───────────────────────────────────────────────────────────────────
@@ -134,6 +145,24 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
   });
 
   const sortedScreenClasses = sortedScreenClassBreakpoints.map(([screenClass]) => screenClass);
+
+  /**
+   * Mobile-First Screen Classes include the current screen class and all smaller
+   *
+   * The should be applied smallest to largest
+   */
+  function getMobileFirstScreenClasses(breakpoint: keyof B) {
+    return sortedScreenClasses.slice(0, sortedScreenClasses.indexOf(breakpoint) + 1);
+  }
+
+  /**
+   * Desktop-First Screen Classes include the current screen class and all larger
+   *
+   * They should be applied from largest to smallest
+   */
+  function getDesktopFirstScreenClasses(breakpoint: keyof B) {
+    return sortedScreenClasses.slice(sortedScreenClasses.indexOf(breakpoint)).reverse();
+  }
 
   //
   // ─── CONTEXT ────────────────────────────────────────────────────────────────────
@@ -242,14 +271,33 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
 
     // TypeScript: this is correct, but TS is having trouble confirming that it will be type P
     const baseProps = omit(props, sortedScreenClasses) as P;
-    const overrides =
-      props[currentScreenClass] !== undefined ? props[currentScreenClass] : ({} as Partial<P>);
 
-    if (typeof overrides === 'function') {
-      return overrides(baseProps);
+    let applicableScreenClasses = [];
+    switch (cascadeMode) {
+      case 'mobile-first':
+        applicableScreenClasses = getMobileFirstScreenClasses(currentScreenClass);
+        break;
+      case 'desktop-first':
+        applicableScreenClasses = getDesktopFirstScreenClasses(currentScreenClass);
+        break;
+      case 'no-cascade':
+      default:
+        applicableScreenClasses = [currentScreenClass];
     }
 
-    return { ...baseProps, ...overrides };
+    // apply each screen class on top of the baseProps
+    // the screenClasses should be sorted in the order in which they should be applied
+    // e.g. mobile-first should apply smallest -> largest
+    // e.g. desktop-first should apply largest -> smallest
+    // we assume that the sorting is already done
+    return applicableScreenClasses.reduce((o, sc) => {
+      const override = props[sc] ?? {};
+      if (typeof override === 'function') {
+        return override(o);
+      } else {
+        return { ...o, ...override };
+      }
+    }, baseProps);
   }
 
   // In order to support refs, we need to use forwardRef
