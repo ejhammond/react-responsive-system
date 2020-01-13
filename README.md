@@ -226,7 +226,7 @@ Put another way:
 
 - "no-cascade" - `sm` overrides apply only on `sm` screens
 - "desktop-first" - `sm` overrides apply on `sm` and `xs` screens
-- "mobile-first" = `sm` overrides apply on `sm`, `md`, and `lg`
+- "mobile-first" - `sm` overrides apply on `sm`, `md`, and `lg`
 
 If you'd like to enable desktop/mobile-first cascading, you can pass the `cascadeMode` option to `createResponsiveSystem`.
 
