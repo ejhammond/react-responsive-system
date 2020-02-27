@@ -41,16 +41,14 @@ const App = () => {
       <HostComponentWithHOC
         ref={hostCompRef}
         style={{ color: 'white', height: 100, width: 100, backgroundColor: '#000000' }}
-        sm={(baseProps) => ({
-          ...baseProps,
-          style: { ...baseProps.style, backgroundColor: 'palevioletred' },
+        sm={{
+          style: { backgroundColor: 'palevioletred' },
           children: 'sm',
-        })}
-        md={(baseProps) => ({
-          ...baseProps,
-          style: { ...baseProps.style, backgroundColor: 'brown' },
+        }}
+        md={{
+          style: { backgroundColor: 'brown' },
           children: 'md',
-        })}
+        }}
       >
         overridden
       </HostComponentWithHOC>
