@@ -238,9 +238,9 @@ export const { ScreenClassProvider, responsive } = createResponsiveSystem({
 });
 ```
 
-## Custom Merge Function
+### Merging
 
-By default, Responsive System will apply any screen-size-specific overrides right on top of your base props, but sometimes you need more control over how your overrides are applied.
+Overrides are applied via [deepmerge](https://www.npmjs.com/package/deepmerge) which means that you can easily apply overrides in arbitrarily-nested objects.
 
 Let's say you've got a component that accepts an `object` as a prop. The intrinsic `style` prop is a great example!
 
@@ -264,50 +264,34 @@ And we can override the style on `small` screens.
 />
 ```
 
-In this case, we might want to override the `backgroundColor` but to leave the `height` alone. But, by default the `small.style` is going to completely override the base `style` and the result on small screens will effectively be:
+A naive override algorithm would simply replace the base `style` with `small.style` and the result would be `style = { backgroundColor: 'blue' }`.
 
-```jsx
-// no height! Bummer...
-<div style={{ backgroundColor: 'blue' }}>
+However, by utilizing `deepmerge` we get `style = { height: 100, backgroundColor: 'blue' }` which is what we'd expect.
+
+#### Arrays
+
+Merging arrays is tricky, but we've chosen a method that seems like a sane default. If there's a need for customization of the array-merge algorithm, we could support that in a future release.
+
+For now, the behavior is to treat them like we treat objects. That is, if the base array defines an item at `[0]` and the override array defines an item at `[0]`, the `override[0]` will be merged on top of `base[0]`. Here are a few examples:
+
+```txt
+base     [1, 2, 3, 4]
+override [5, 6, 7]
+result   [5, 6, 7, 4]
 ```
 
-We can fix this by providing a `function` as a prop rather than an object. The function will be invoked with the base props as an argument so that you can have full control over how the overrides are handled.
-
-```js
-<ResponsiveDiv
-  style={{ height: 100, backgroundColor: 'black' }}
-  small={(baseProps) => {
-    return {
-      ...baseProps,
-      style: { ...baseProps.style, backgroundColor: 'blue' },
-    };
-  }}
-/>
+```txt
+base     [1, 2, 3]
+override [5, 6, 7, 8]
+result   [5, 6, 7, 8]
 ```
 
-And voila! Your overrides are applied on your terms.
+Objects inside of an array are merged too! Objects and arrays can be nested arbitrarily deep, but keep in mind that merging deeply-nested structures will require our merge algorithm to do more work which could impact performance. It's best to keep your props as shallow as possible.
 
-### Optimizing
-
-Pro tip: if you've got a bunch of screen classes that all need to perform custom overrides in the same way, you can create a helper function.
-
-```jsx
-function makeOverrideFn(overrides) {
-  // function that returns a function!
-  return (baseProps) => {
-    return {
-      ...baseProps,
-      style: { ...baseProps.style, ...overrides },
-    };
-  };
-}
-
-<ResponsiveDiv
-  style={{ height: 100, backgroundColor: 'black' }}
-  small={makeOverrideFn({ backgroundColor: 'blue' })}
-  medium={makeOverrideFn({ backgroundColor: 'green' })}
-  large={makeOverrideFn({ backgroundColor: 'purple' })}
-/>;
+```txt
+base     [{ a: 'alpha' }, 1]
+override [{ b: 'bravo' }, 2]
+result   [{ a: 'alpha', b: 'bravo' }, 2]
 ```
 
 ## Goodies
