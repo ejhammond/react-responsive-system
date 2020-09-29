@@ -1,10 +1,8 @@
 # 💬 Responsive System
 
-A new way to write responsive components.
-
 ## Motivation
 
-Check out this [post](https://tripps.tips/responsive-react-components/) to learn more about the motivation behind Responsive System.
+Check out this [post](https://ayhota.com/blog/responsive-react-components/) to learn more about the motivation behind Responsive System.
 
 ## Sneak Peek
 

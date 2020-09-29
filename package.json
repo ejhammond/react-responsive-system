@@ -9,10 +9,10 @@
   ],
   "version": "0.8.0",
   "license": "MIT",
-  "author": "Tripp Hammond",
+  "author": "EJ Hammond",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tripphamm/react-responsive-system"
+    "url": "https://github.com/ejhammond/react-responsive-system"
   },
   "main": "dist/index.js",
   "module": "dist/react-responsive-system.esm.js",
@@ -24,25 +24,29 @@
     "start": "tsdx watch",
     "build": "tsdx build",
     "test": "tsdx test",
-    "lint": "tk-lint",
-    "format": "tk-format",
-    "release": "yarn build && yarn test && tk-release"
+    "lint": "jskit-lint",
+    "format": "jskit-format",
+    "release": "jskit-release"
   },
   "peerDependencies": {
     "react": ">=16.8"
   },
   "devDependencies": {
+    "@ejhammond/eslint-plugin": "^2.0.0",
+    "@ejhammond/jskit": "^2.0.2",
     "@testing-library/react": "^9.3.2",
-    "@tripphamm/trippkit": "^1.2.2",
     "@types/jest": "^24.0.22",
+    "@types/node": "^14.11.2",
     "@types/react": "^16.9.11",
     "@types/react-dom": "^16.9.4",
+    "eslint": "^6.0.0",
     "husky": "^3.0.9",
+    "prettier": "^2.1.2",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
-    "tsdx": "^0.12.1",
+    "tsdx": "^0.14.0",
     "tslib": "^1.10.0",
-    "typescript": "^3.7.2"
+    "typescript": "^4.0.0"
   },
   "dependencies": {
     "deepmerge": "^4.2.2"

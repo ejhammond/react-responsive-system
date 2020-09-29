@@ -123,7 +123,7 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
   /**
    * Mobile-First Screen Classes include the current screen class and all smaller
    *
-   * The should be applied smallest to largest
+   * They should be applied smallest to largest
    */
   function getMobileFirstScreenClasses(breakpoint: keyof B) {
     return sortedScreenClasses.slice(0, sortedScreenClasses.indexOf(breakpoint) + 1);
