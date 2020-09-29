@@ -4,7 +4,7 @@ module.exports = {
   globals: {
     __DEV__: true,
   },
-  roots: ['src', 'test'],
+  roots: ['src'],
   testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['./test/setup.ts'],
+  setupFilesAfterEnv: ['./src/test/setup.ts'],
 };

@@ -1,4 +1,4 @@
-import { merge } from '../src/merge';
+import { merge } from '../merge';
 
 it('merges same-length arrays', () => {
   const a = { array: [1, 2, 3] };

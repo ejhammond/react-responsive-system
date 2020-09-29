@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ResponsiveProps, createResponsiveSystem, ScreenClassConfiguration } from '../src';
+import { ResponsiveProps, createResponsiveSystem, ScreenClassConfiguration } from '../..';
 import { render } from '@testing-library/react';
 
 const breakpoints = {
