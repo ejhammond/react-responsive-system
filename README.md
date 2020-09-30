@@ -153,8 +153,8 @@ import Button from './components/Button';
 
 ## Examples
 
-[TypeScript](https://github.com/tripphamm/react-responsive-system/tree/master/examples/typescript)
-[Gatsby](https://github.com/tripphamm/react-responsive-system/tree/master/examples/gatsby)
+[TypeScript](https://github.com/ejhammond/react-responsive-system/tree/master/examples/typescript)
+[Gatsby](https://github.com/ejhammond/react-responsive-system/tree/master/examples/gatsby)
 
 ## Cascading
 
@@ -323,7 +323,7 @@ const Button = props => {
 
 `useResponsiveProps` takes in a `props` that contains your screen class overrides, and it will return a clean `props` that matches your component's existing API.
 
-> Tip: If you're using the hook with TypeScript, you may be interested in the `ResponsiveProps` type that's exported from the library. Have a look in the example folder: [here](https://github.com/tripphamm/react-responsive-system/blob/master/examples/typescript/responsiveSystem.ts#L18), [and here](https://github.com/tripphamm/react-responsive-system/blob/master/examples/typescript/componentUsingHook.tsx#L9)
+> Tip: If you're using the hook with TypeScript, you may be interested in the `ResponsiveProps` type that's exported from the library. Have a look in the example folder: [here](https://github.com/ejhammond/react-responsive-system/blob/master/examples/typescript/responsiveSystem.ts#L18), [and here](https://github.com/ejhammond/react-responsive-system/blob/master/examples/typescript/componentUsingHook.tsx#L9)
 
 ### `useScreenClass` Hook
 
