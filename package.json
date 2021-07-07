@@ -35,7 +35,7 @@
     "@ejhammond/eslint-plugin": "^2.0.0",
     "@ejhammond/jskit": "^2.0.4",
     "@testing-library/react": "^9.3.2",
-    "@types/jest": "^24.0.22",
+    "@types/jest": "^26.0.24",
     "@types/node": "^14.11.2",
     "@types/react": "^16.9.11",
     "@types/react-dom": "^16.9.4",
