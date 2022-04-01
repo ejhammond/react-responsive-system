@@ -259,7 +259,10 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
     // e.g. mobile-first should apply smallest -> largest
     // e.g. desktop-first should apply largest -> smallest
     // we assume that the sorting is already done
-    const propsToMerge = [baseProps, ...applicableScreenClasses.map((sc) => props[sc] ?? {})];
+    const propsToMerge = [
+      baseProps,
+      ...applicableScreenClasses.map((sc) => props[sc.toString()] ?? {}),
+    ];
     return merge(propsToMerge);
   }
 
