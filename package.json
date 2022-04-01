@@ -8,6 +8,7 @@
     "component library"
   ],
   "version": "0.8.4",
+  "sideEffects": false,
   "license": "MIT",
   "author": "EJ Hammond",
   "repository": {
