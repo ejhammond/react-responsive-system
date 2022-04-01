@@ -88,9 +88,6 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
 
   // optimize these error-checks out of production builds
   if (__DEV__) {
-    // todo: validate that defaultScreenClass is defined or that breakpoints is an object?
-    // how much should we assume based on our Types?
-
     const breakpointValues = Object.values(breakpoints);
     if (breakpointValues.length < 2) {
       throw new Error(
@@ -119,6 +116,24 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
   });
 
   const sortedScreenClasses = sortedScreenClassBreakpoints.map(([screenClass]) => screenClass);
+
+  type MediaQuery = string;
+  const screenClassMediaQueries: [ScreenClass<B>, MediaQuery][] = sortedScreenClassBreakpoints.map(
+    ([screenClass, maxWidthPx], index) => {
+      // the minWidth for this screenClass is the maxWidth of the previous breakpoint + 1
+      const minWidthPx = index > 0 ? sortedScreenClassBreakpoints[index - 1][1] + 1 : 0;
+
+      const constraints: string[] = [];
+      if (minWidthPx !== 0) {
+        constraints.push(`(min-width: ${minWidthPx}px)`);
+      }
+      if (maxWidthPx !== Infinity) {
+        constraints.push(`(max-width: ${maxWidthPx}px)`);
+      }
+
+      return [screenClass, constraints.join(' and ')];
+    },
+  );
 
   /**
    * Mobile-First Screen Classes include the current screen class and all smaller
@@ -151,59 +166,39 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
   const { Provider } = screenClassContext;
 
   const ScreenClassProvider: React.FC = ({ children }) => {
-    const [screenClass, setScreenClass] = React.useState<keyof B>(defaultScreenClass);
+    const [currentScreenClass, setCurrentScreenClass] = React.useState<keyof B>(defaultScreenClass);
 
     React.useLayoutEffect(() => {
       if (!windowExists) {
         return;
       }
 
-      // build the media queries
-      const screenClassMediaQueries: [keyof B, MediaQueryList][] = sortedScreenClassBreakpoints.map(
-        ([screenClass, maxWidthPx], index) => {
-          // the minWidth for this screenClass is the maxWidth of the previous breakpoint + 1
-          const minWidthPx = index > 0 ? sortedScreenClassBreakpoints[index - 1][1] + 1 : 0;
-
-          const constraints: string[] = [];
-          if (minWidthPx !== 0) {
-            constraints.push(`(min-width: ${minWidthPx}px)`);
-          }
-          if (maxWidthPx !== Infinity) {
-            constraints.push(`(max-width: ${maxWidthPx}px)`);
-          }
-
-          const mediaQuery = constraints.join(' and ');
-
-          const mediaQueryList = window.matchMedia(mediaQuery);
-
-          // in order to set the correct initial state, we need to immediately check each mql
-          if (mediaQueryList.matches) {
-            setScreenClass(screenClass);
-          }
-
-          return [screenClass, mediaQueryList];
-        },
-      );
-
       type MediaQueryListListener = (this: MediaQueryList, event: MediaQueryListEvent) => any;
-
       const listeners: [MediaQueryList, MediaQueryListListener][] = [];
+
       screenClassMediaQueries.forEach(([screenClass, mediaQuery]) => {
+        const mediaQueryList = window.matchMedia(mediaQuery);
+
+        // in order to set the correct initial state, we need to immediately check each mql
+        if (mediaQueryList.matches) {
+          setCurrentScreenClass(screenClass);
+        }
+
         const listener: MediaQueryListListener = (event) => {
           if (event.matches) {
-            setScreenClass(screenClass);
+            setCurrentScreenClass(screenClass);
           }
         };
 
-        mediaQuery.addListener(listener);
+        mediaQueryList.addListener(listener);
 
-        listeners.push([mediaQuery, listener]);
+        listeners.push([mediaQueryList, listener]);
       });
 
       return () => listeners.forEach(([mql, l]) => mql.removeListener(l));
     }, []);
 
-    return <Provider value={screenClass}>{children}</Provider>;
+    return <Provider value={currentScreenClass}>{children}</Provider>;
   };
 
   function useScreenClass(): keyof B {

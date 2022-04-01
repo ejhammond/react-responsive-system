@@ -20,21 +20,21 @@ const App = () => {
     <ScreenClassProvider>
       <FunctionComponentWithHOC
         someColor="#000000"
-        someText="overridden"
+        someText="default"
         sm={{ someColor: 'palevioletred', someText: 'sm' }}
         md={{ someColor: 'brown', someText: 'md' }}
       />
       <ForwardRefComponentWithHOC
         ref={forwardRefCompRef}
         someColor="#000000"
-        someText="overridden"
+        someText="default"
         sm={{ someColor: 'palevioletred', someText: 'sm' }}
         md={{ someColor: 'brown', someText: 'md' }}
       />
       <ClassComponentWithHOC
         ref={classCompRef}
         someColor="#000000"
-        someText="overridden"
+        someText="default"
         sm={{ someColor: 'palevioletred', someText: 'sm' }}
         md={{ someColor: 'brown', someText: 'md' }}
       />
@@ -50,11 +50,11 @@ const App = () => {
           children: 'md',
         }}
       >
-        overridden
+        default
       </HostComponentWithHOC>
       <CustomComponentWithHook
         someColor="#000000"
-        someText="overridden"
+        someText="default"
         sm={{ someColor: 'palevioletred', someText: 'sm' }}
         md={{ someColor: 'brown', someText: 'md' }}
       />

@@ -154,6 +154,7 @@ import Button from './components/Button';
 ## Examples
 
 [TypeScript](https://github.com/ejhammond/react-responsive-system/tree/master/examples/typescript)
+<br />
 [Gatsby](https://github.com/ejhammond/react-responsive-system/tree/master/examples/gatsby)
 
 ## Cascading

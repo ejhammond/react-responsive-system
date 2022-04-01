@@ -10,6 +10,7 @@ const breakpoints = {
 export const { ScreenClassProvider, useResponsiveProps, responsive } = createResponsiveSystem({
   defaultScreenClass: 'lg',
   breakpoints,
+  cascadeMode: 'mobile-first',
 });
 
 // ResponsiveProps takes 2 type args: the breakpoints, and the props
