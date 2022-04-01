@@ -4,27 +4,19 @@
 
 Check out this [post](https://ayhota.com/blog/articles/responsive-react-components) to learn more about the motivation behind Responsive System.
 
-## Sneak Peek
+## Upgrading?
+
+Jump to the [Changelog](#changelog) for information about breaking changes and recommendations around upgrading.
+
+## What does it look like?
 
 ```jsx
-// works with _any_ component at all
-import { Button } from '@material-ui/core/Button';
-
-// just pass the component to the `responsive` util
-// all of your screen classes are added as props
-// and the overrides will be handled automatically
-const ResponsiveButton = responsive(Button);
-
-<ResponsiveButton
-  color="primary",
-  variant="outlined",
-  marginTop="2em",
-  small={{
-    // overrides applied on "small" screens
-    marginTop: "1em",
-    fullWidth: true,
-  }}
-/>
+const MyResponsiveComponent() {
+  const message = useResponsiveValue<string>("Your screen is big", { onSmallScreens: "Your screen is small" });
+  const number = useResponsiveValue<number>(100, { onMediumScreens: 50, onSmallScreensOrSmaller: 25 });
+  // don't get hung up on the "onXScreens" language; that's fully customizable!
+  ...
+}
 ```
 
 ## Getting Started
@@ -40,7 +32,7 @@ yarn add react-responsive-system
 1. [Define your breakpoints in JS](#1-define-your-breakpoints-in-js)
 2. [Generate your custom Responsive System with `createResponsiveSystem`](#2-generate-your-custom-responsive-system-with-createresponsivesystem)
 3. [Render the ScreenClassProvider near the root of your app](#3-render-the-screenclassprovider-near-the-root-of-your-app)
-4. [Wrap your comps with `responsive`](#4-wrap-your-comps-with-responsive)
+4. [Make your components responsive](#4-make-your-components-responsive)
 
 ### 1. Define your breakpoints in JS
 
@@ -76,7 +68,7 @@ const breakpoints = {
   // your breakpoints here
 };
 
-export const { ScreenClassProvider, responsive } = createResponsiveSystem({
+export const { ScreenClassProvider, useResponsiveValue } = createResponsiveSystem({
   breakpoints,
   defaultScreenClass: 'lg',
 });
@@ -84,7 +76,7 @@ export const { ScreenClassProvider, responsive } = createResponsiveSystem({
 
 Let's break this down a little bit.
 
-We're calling `createResponsiveSystem` with our own custom breakpoints, and we get back a `ScreenClassProvider` (keeps track of the current screen class) and a function called `responsive` (makes your components responsive). We also provided a `defaultScreenClass` so that Responsive System knows which screen class to use when it can't find a `window` to measure (e.g. during SSR or headless testing). We immediately export both `ScreenClassProvider` and `responsive` so that we can use them across our app.
+We're calling `createResponsiveSystem` with our own custom breakpoints, and we get back a `ScreenClassProvider` (keeps track of the current screen class), and a hook called `useResponsiveValue` (creates a value that changes based on the screen class). We also provided a `defaultScreenClass` so that Responsive System knows which screen class to use when it can't find a `window` to measure (e.g. during SSR or headless testing). We immediately export everything so that we can import it across our app.
 
 ### 3. Render the ScreenClassProvider near the root of your app
 
@@ -101,61 +93,25 @@ ReactDOM.render(
 );
 ```
 
-### 4. Wrap your comps with `responsive`
+### 4. Make your components responsive
 
-Now, whenever you come across a situation where a component needs to use different props depending on the screen class, just wrap the component in the `responsive` Higher-Order Component (HOC) and it will instantly understand your responsive props!
+#### a. `useResponsiveValue`
+
+Now that the app is aware of the current screen class, we can declare values that dynamically change to fit any screen!
 
 ```js
-import { responsive } from '../responsiveSystem';
-import Button from './components/Button';
-
-const ResponsiveButton = responsive(Button);
-
-// now you can use any of the props from Button
-// AND you get extra props based on your breakpoints
-<ResponsiveButton
-  onClick={() => alert('Clicked!')}
-  xs={{ onClick: () => alert('Clicked on an extra small screen!') }}
-/>;
+const MyResponsiveComponent() {
+  const message = useResponsiveValue<string>("Your screen is big", { sm: "Your screen is small" });
+  const number = useResponsiveValue<number>(100, { md: 50, sm: 25, xs: 5 });
+  // ...
+}
 ```
 
-If you want your component to be responsive all the time, you can export the responsive version rather than wrapping it each time.
-
-```jsx
-// your-app/components/Button.js
-
-import { responsive } from '../responsiveSystem';
-
-const Button = props => {
-  const { buttonSize, buttonType, buttonText } = props;
-
-  // return <button>...
-};
-
-// just add responsive() around your export
-export responsive(Button);
-```
-
-And now it will be responsive everywhere you use it!
-
-```jsx
-// already responsive!
-import Button from './components/Button';
-
-<Button
-  buttonText="Default text"
-  sm={{ buttonText: 'Small screen text', buttonSize: 'large' }}
-  lg={{ buttonText: 'Large screen text', buttonSize: 'normal' }}
-/>;
-```
-
-> Don't like HOC's? You can use the [`useResponsiveProps` hook](#useresponsiveprops-hook) instead! The HOC uses the hook behind the scenes, so you'll get the exact same behavior either way.
+The first param is the default value (used when there are no applicable overrides) and the second param specifies the overrides. Check out the [Cascading](#cascading) section to see how you can customize the behavior of these overrides.
 
 ## Examples
 
-[TypeScript](https://github.com/ejhammond/react-responsive-system/tree/master/examples/typescript)
-<br />
-[Gatsby](https://github.com/ejhammond/react-responsive-system/tree/master/examples/gatsby)
+[TypeScript + Parcel](https://github.com/ejhammond/react-responsive-system/tree/master/examples/typescript)
 
 ## Cascading
 
@@ -163,168 +119,69 @@ By default, Responsive System overrides do not cascade, which is to say: if you 
 
 This is where `cascadeMode` comes in.
 
-Let's take an example. We'll assume that we have 4 screen classes, "xs", "sm", "md", and "lg" and that we have a `Button` component that can be either `normal` or `large`. On most screen sizes, we want our button to be `normal` size, but on `xs` screens (like mobile phones) we want to make the button nice and big so that it's easier to tap.
+> Our examples here will use 5 screen classes (`xl` > `lg` > `md` > `sm` > `xs`)
 
-There are 2 ways that you can do this with the default configuration of Responsive System:
+### No Cascade
 
-```jsx
-<Button
-  // default is "normal"
-  buttonSize="normal"
-  // override on xs screens
-  xs={{ buttonSize: 'large' }}
-/>
+This is the default configuration. There is no implicit overriding in this mode.
+
+```js
+const number = useResponsiveValue('default', { md: 'overridden' });
 ```
 
-This approach is called "desktop-first" because the default values pertain to larger screens, and we provide overrides for smaller screens.
+Result:
 
-We could also write this in a "mobile-first" way like this:
+- xl: "default"
+- lg: "default"
+- md: "overridden"
+- sm: "default"
+- xs: "default"
 
-```jsx
-<Button
-  // default to "large"
-  buttonSize="large"
-  // override on sm, md, and lg screens
-  sm={{ buttonSize: 'normal' }}
-  md={{ buttonSize: 'normal' }}
-  lg={{ buttonSize: 'normal' }}
-/>
+### Desktop First
+
+In Desktop First mode, your overrides implicitly override everything smaller. Conceptually, you are specifying your default values for your largest screen class, and then making tweaks once the screen starts to get too small.
+
+```js
+const number = useResponsiveValue('default', { md: 'overridden' });
 ```
 
-In this particular case, the "desktop-first" approach is shorter and easier to understand, but sometimes the reverse will be true. Using the default `cascadeMode` ("no-cascade") allows you to choose which approach works best on a case-by-case basis. You pick your default values and then apply overrides for any screen sizes that need special treatment.
+Result:
 
-For folks who find value in having a consistent "desktop-first" or "mobile-first" approach throughout their apps, we also provide `cascadeMode = "desktop-first"` and `cascadeMode = "mobile-first"`. In these modes, you always provide default values for either your largest screen class ("desktop-first") or your smallest ("mobile-first") and your overrides will _cascade_.
+- xl: "default"
+- lg: "default"
+- md: "overridden"
+- sm: "overridden"
+- xs: "overridden"
 
-Going back to our example, if we had used `cascadeMode = "desktop-first"` we would still write:
+### Mobile First
 
-```jsx
-<Button
-  // desktop-first default value
-  buttonSize="normal"
-  // override on xs screens AND anything smaller
-  xs={{ buttonSize: 'large' }}
-/>
+In Mobile First mode, your overrides implicitly override everything larger. Conceptually, you are specifying your default values for your smallest screen class, and then making tweaks once the screen starts to get big enough.
+
+```js
+const number = useResponsiveValue('default', { md: 'overridden' });
 ```
 
-The desktop-first cascade would automatically add our overrides on any screen classes smaller that `xs`, but no such screen classes exist, so the cascade doesn't come into play here.
+Result:
 
-On the other hand, if we had used `cascadeMode = "mobile-first"`, we could take advantage of the mobile-first cascade:
+- xl: "overridden"
+- lg: "overridden"
+- md: "overridden"
+- sm: "default"
+- xs: "default"
 
-```jsx
-<Button
-  // mobile-first default value
-  buttonSize="large"
-  // override on sm AND anything larger
-  sm={{ buttonSize: 'normal' }}
-/>
-```
-
-The mobile-first cascade says "apply these overrides on _this_ screen class _and_ any larger screen classes too".
-
-Put another way:
-
-- "no-cascade" - `sm` overrides apply only on `sm` screens
-- "desktop-first" - `sm` overrides apply on `sm` and `xs` screens
-- "mobile-first" - `sm` overrides apply on `sm`, `md`, and `lg`
+### Enabling a `cascadeMode`
 
 If you'd like to enable desktop/mobile-first cascading, you can pass the `cascadeMode` option to `createResponsiveSystem`.
 
 ```js
-export const { ScreenClassProvider, responsive } = createResponsiveSystem({
+export const { ScreenClassProvider, useResponsiveValue } = createResponsiveSystem({
   breakpoints,
   defaultScreenClass: 'lg',
   cascadeMode: 'mobile-first', // or "desktop-first"
 });
 ```
 
-### Merging
-
-Overrides are applied via [deepmerge](https://www.npmjs.com/package/deepmerge) which means that you can easily apply overrides in arbitrarily-nested objects.
-
-Let's say you've got a component that accepts an `object` as a prop. The intrinsic `style` prop is a great example!
-
-```jsx
-// component accepts an object as a prop
-<div style={{ height: 100, backgroundColor: 'black' }}>
-```
-
-We can make a `div` responsive with Responsive System:
-
-```js
-const ResponsiveDiv = responsive('div');
-```
-
-And we can override the style on `small` screens.
-
-```jsx
-<ResponsiveDiv
-  style={{ height: 100, backgroundColor: 'black' }}
-  small={{ style: { backgroundColor: 'blue' } }}
-/>
-```
-
-A naive override algorithm would simply replace the base `style` with `small.style` and the result would be `style = { backgroundColor: 'blue' }`.
-
-However, by utilizing `deepmerge` we get `style = { height: 100, backgroundColor: 'blue' }` which is what we'd expect.
-
-#### Arrays
-
-Merging arrays is tricky, but we've chosen a method that seems like a sane default. If there's a need for customization of the array-merge algorithm, we could support that in a future release.
-
-For now, the behavior is to treat them like we treat objects. That is, if the base array defines an item at `[0]` and the override array defines an item at `[0]`, the `override[0]` will be merged on top of `base[0]`. Here are a few examples:
-
-```txt
-base     [1, 2, 3, 4]
-override [5, 6, 7]
-result   [5, 6, 7, 4]
-```
-
-```txt
-base     [1, 2, 3]
-override [5, 6, 7, 8]
-result   [5, 6, 7, 8]
-```
-
-Objects inside of an array are merged too! Objects and arrays can be nested arbitrarily deep, but keep in mind that merging deeply-nested structures will require our merge algorithm to do more work which could impact performance. It's best to keep your props as shallow as possible.
-
-```txt
-base     [{ a: 'alpha' }, 1]
-override [{ b: 'bravo' }, 2]
-result   [{ a: 'alpha', b: 'bravo' }, 2]
-```
-
 ## Goodies
-
-### `useResponsiveProps` Hook
-
-The `responsive` HOC takes your component, calls this React hook, and then returns your component with the proper screen-class-based props. If you're using the `responsive` HOC, then you don't need to worry about this hook at all, but if you prefer to use the hook directly, feel free!
-
-```jsx
-/* responsiveSystem.js/ts */
-
-...
-
-export const {
-  ScreenClassProvider,
-  useResponsiveProps, // export the hook
-} = createResponsiveSystem(...);
-
-/* button.js/ts */
-
-import { useResponsiveProps } from '../responsiveSystem';
-
-const Button = props => {
-  // wrap your props
-  // const { buttonSize, buttonType, buttonText } = props;
-  const { buttonSize, buttonType, buttonText } = useResponsiveProps(props);
-
-  // return ...
-};
-```
-
-`useResponsiveProps` takes in a `props` that contains your screen class overrides, and it will return a clean `props` that matches your component's existing API.
-
-> Tip: If you're using the hook with TypeScript, you may be interested in the `ResponsiveProps` type that's exported from the library. Have a look in the example folder: [here](https://github.com/ejhammond/react-responsive-system/blob/master/examples/typescript/responsiveSystem.ts#L18), [and here](https://github.com/ejhammond/react-responsive-system/blob/master/examples/typescript/componentUsingHook.tsx#L9)
 
 ### `useScreenClass` Hook
 
@@ -347,9 +204,8 @@ import { useScreenClass } from '../responsiveSystem';
 
 const Button = props => {
   const screenClass = useScreenClass();
-  // screenClass be a string representation of one of your breakpoints e.g. "xs", "mobile", etc.
-
-  // return ...
+  // screenClass will be a string representation of one of your breakpoints e.g. "xs", "mobile", etc.
+  // ...
 };
 ```
 
@@ -362,3 +218,45 @@ If `react-responsive-system` cannot access the `window`, it will use the `defaul
 For folks who are curious about the implementation:
 
 Fundamentally, we need our components to be aware of the current screen class so they know when to re-render. We do this by constructing Media Queries from your breakpoints and using `window.matchMedia` to observe changes, then we _provide_ the current screen class to components via React Context. This should only trigger a re-render when the screen class actually changes, and not during resizing events within the same screen class.
+
+## Changelog
+
+Responsive System uses strict Semantic Versioning which means that our version numbers carry extra meaning. Then general form is:
+
+`v{major}.{minor}.{patch}`
+
+- `patch` - if this number changes, then we've shipped a bug fix or small tweak
+- `minor` - if this number changes, then we've shipped a new feature that's backwards compatible
+- `major` - if this number changes, then we've shipped a change that's not backwards compatible so be careful when upgrading!
+
+Also, in order to support rapid development at the start of a project, v0.X.X versions are handled slightly differently:
+
+`v0.{major}.{minor}`
+
+So the middle number actually represents a major breaking change for v0 versions. That's important to keep in mind so that you don't accidentally upgrade to a version that's not compatible with your existing code!
+
+In this section, we'll cover those major changes so that folks can decide whether or not they want to update.
+
+### v0.9
+
+There are significant breaking changes between the 0.8.X and 0.9.X lines. With that said, the 0.8.X line went for 2+ years with no major changes and is quite stable, so there's really not much reason to upgrade if it's working for your project!
+
+The reason that we haven't moved to 1.0 yet is that the API just hasn't felt quite right. It was a bit clunky and there were a few hacks behind the scenes to get it to work the way that we wanted it to work. 0.9 eliminates those hacks, improves the performance, and generally gets much closer to what we feel could be worthy of 1.0; the downside is that we needed to make some fundamental (breaking) changes.
+
+So what changed?
+
+In 0.9 we moved away from the HOC `responsive(Component)` approach and adopted a streamlined hook-based approach. The hook-based approach is much smaller (in terms of bytes) and much lighter in the sense that we no longer modify your components "magically". Fundamentally, we've shifted from wrapping entire components to make them responsive to wrapping individual values/variables.
+
+```js
+// 0.8.X
+const ResponsiveCarousel = responsive(Carousel);
+
+<ResponsiveCarousel slidesToShow={4} onSmallScreens={{ slidesToShow: 2 }} />;
+
+// 0.9.X
+const responsiveSlidesToShow = useResponsiveValue(4, { onSmallScreens: 2 });
+
+<Carousel slidesToShow={responsiveSlidesToShow} />;
+```
+
+It's quite difficult to gather community feedback for a change like this, but we're very interested to hear how y'all feel about the change. Did you love the old API? Should we continue to support it? Do you have a use case where the new API falls short? Feel free to reach out on Twitter (@ejhammond) or to file an issue to start a discussion!
