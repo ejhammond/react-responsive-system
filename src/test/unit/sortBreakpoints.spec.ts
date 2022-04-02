@@ -10,9 +10,7 @@ const breakpoints = {
 
 describe('sortBreakpoints', () => {
   it('sorts', () => {
-    const b = sortBreakpoints(breakpoints);
-    console.log(b);
-    expect(b).toStrictEqual([
+    expect(sortBreakpoints(breakpoints)).toStrictEqual([
       ['one', 1],
       ['two', 2],
       ['three', 3],
