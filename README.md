@@ -51,8 +51,6 @@ const breakpoints = {
 };
 ```
 
-> Tip: Each key in this object will become a prop on your components--watch out for naming conflicts!
-
 The values that you provide are the "maximum pixel-widths" for that screen class. In order to make sure that all possible screen pixel-sizes are handled, there should be exactly one screen class with a value of `Infinity` which tells us that there is no maximum pixel-width for that screen class.
 
 ### 2. Generate your custom Responsive System with `createResponsiveSystem`
@@ -94,8 +92,6 @@ ReactDOM.render(
 ```
 
 ### 4. Make your components responsive
-
-#### a. `useResponsiveValue`
 
 Now that the app is aware of the current screen class, we can declare values that dynamically change to fit any screen!
 
@@ -221,7 +217,7 @@ Fundamentally, we need our components to be aware of the current screen class so
 
 ## Changelog
 
-Responsive System uses strict Semantic Versioning which means that our version numbers carry extra meaning. Then general form is:
+Responsive System uses strict Semantic Versioning which means that our version numbers carry extra meaning. The general form is:
 
 `v{major}.{minor}.{patch}`
 
@@ -245,7 +241,7 @@ The reason that we haven't moved to 1.0 yet is that the API just hasn't felt qui
 
 So what changed?
 
-In 0.9 we moved away from the HOC `responsive(Component)` approach and adopted a streamlined hook-based approach. The hook-based approach is much smaller (in terms of bytes) and much lighter in the sense that we no longer modify your components "magically". Fundamentally, we've shifted from wrapping entire components to make them responsive to wrapping individual values/variables.
+In 0.9 we moved away from the HOC `responsive(Component)` approach and adopted a streamlined hook-based approach. The hook-based approach is much smaller (in terms of bytes) and much lighter in the sense that we no longer modify your components "magically". Fundamentally, we've shifted from wrapping entire components to wrapping individual values/variables.
 
 ```js
 // 0.8.X
