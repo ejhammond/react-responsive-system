@@ -55,7 +55,7 @@ The values that you provide are the "maximum pixel-widths" for that screen class
 
 ### 2. Generate your custom Responsive System with `createResponsiveSystem`
 
-Here, you'll configure ResponsiveSystem with your breakpoints.
+Here, you'll configure Responsive System with your breakpoints.
 
 ```js
 /* responsiveSystem.js/ts */
@@ -68,13 +68,12 @@ const breakpoints = {
 
 export const { ScreenClassProvider, useResponsiveValue } = createResponsiveSystem({
   breakpoints,
-  defaultScreenClass: 'lg',
 });
 ```
 
 Let's break this down a little bit.
 
-We're calling `createResponsiveSystem` with our own custom breakpoints, and we get back a `ScreenClassProvider` (keeps track of the current screen class), and a hook called `useResponsiveValue` (creates a value that changes based on the screen class). We also provided a `defaultScreenClass` so that Responsive System knows which screen class to use when it can't find a `window` to measure (e.g. during SSR or headless testing). We immediately export everything so that we can import it across our app.
+We're calling `createResponsiveSystem` with our own custom breakpoints, and we get back a `ScreenClassProvider` (keeps track of the current screen class), and a hook called `useResponsiveValue` (creates a value that changes based on the screen class). Then, we export everything so that we can import it across our app.
 
 ### 3. Render the ScreenClassProvider near the root of your app
 
@@ -172,12 +171,57 @@ If you'd like to enable desktop/mobile-first cascading, you can pass the `cascad
 ```js
 export const { ScreenClassProvider, useResponsiveValue } = createResponsiveSystem({
   breakpoints,
-  defaultScreenClass: 'lg',
   cascadeMode: 'mobile-first', // or "desktop-first"
 });
 ```
 
-## Goodies
+## Server-Side Rendering
+
+Server-Side rendering is a bit tricky because we don't have access to the user's device to measure their screen. Because we can't automatically determine the proper screen class during SSR, you must "manually" provide an `initialScreenClass` for Responsive System to render.
+
+```js
+export const { ScreenClassProvider, useResponsiveValue } = createResponsiveSystem({
+  breakpoints,
+  initialScreenClass: 'lg', // only add this if you're doing Server-Side Rendering
+});
+```
+
+Now here's the downside: if you guess the initial screen class incorrectly, your users may see a quick flash of the wrong layout before React kicks in (hydrates the app) and adjusts to the proper screen class. In order to avoid that experience, you have a few options:
+
+### Don't SSR
+
+This is the easiest approach. If you don't SSR, then you don't have to worry about manually figuring out the initial screen class. We can figure it out for you and we can make sure that there's no flash of an incorrect screen class
+
+### Client-Only Components
+
+You can render some placeholder content (like a spinner/skeleton/glimmer) during SSR and then render the correct content once the code gets to the client. Showing a loading experience is better than showing an incorrect layout and then shifting it.
+
+Here's a quick implementation that you could use to render a placeholder on the server:
+
+```jsx
+function ClientOnly({ placeholder, children }) {
+  const isOnClient = useRef(false);
+  useEffect(() => {
+    // useEffect only runs on the client
+    isOnClient.current = true;
+  }, []);
+  // will return `placeholder` on the server and `children` on the client
+  return isOnClient.current ? children : placeholder;
+}
+// usage
+<ClientOnly placeholder={<PlaceholderContent />}>
+  <ResponsiveComponent />
+</ClientOnly>;
+```
+
+### Smart Server
+
+This route is tricky, but if you want to try it, here are some ideas:
+
+- At a minimum you can check the User-Agent Request header to get an idea of what type of device is being used (mobile vs laptop/desktop) and use that info to make an educated guess.
+- If your user is navigating from page to page in your app and you control the links, you could append width and height query params to each request before it goes out. The first page they hit wouldn't have the query params, but all subsequent pages would. And it's technically possible for someone to resize their screen after they click a link, so it's not bulletproof.
+
+## Extras
 
 ### `useScreenClass` Hook
 
@@ -190,7 +234,7 @@ Want direct access to the screen class itself? Sure! We're already providing it 
 
 export const {
   ScreenClassProvider,
-  responsive,
+  useResponsiveValue,
   useScreenClass, // export the hook
 } = createResponsiveSystem(...);
 
@@ -204,10 +248,6 @@ const Button = props => {
   // ...
 };
 ```
-
-## Server-Side Rendering
-
-If `react-responsive-system` cannot access the `window`, it will use the `defaultScreenClass` that you set in the configuration object. When the code is re-hydrated on the client, it will adjust to the actual screen class.
 
 ## Under the Hood
 
@@ -233,9 +273,17 @@ So the middle number actually represents a major breaking change for v0 versions
 
 In this section, we'll cover those major changes so that folks can decide whether or not they want to update.
 
-### v0.9
+### v0.10 - Server-Side Rendering support
 
-There are significant breaking changes between the 0.8.X and 0.9.X lines. With that said, the 0.8.X line went for 2+ years with no major changes and is quite stable, so there's really not much reason to upgrade if it's working for your project!
+In this update we focused on supporting server-side rendering (SSR). Fundamentally, we don't have access to the user's screen during server rendering, so we can't automatically determine the proper screen class for the server-rendered content.
+
+In order to continue to provide an optimal client-side rendering experience while also supporting a bug-free server-side rendering experience we made `defaultScreenClass` optional and we also renamed it to `initialScreenClass` to make its purpose more clear. Making it optional allows us to dynamically decide whether to use our client-side optimized implementation or to switch to the server-side optimized implementation.
+
+IMPORTANT: if your app is client-side only, don't include `initialScreenClass` in your setup! We'll automatically determine the initial screen class and ensure that the content renders properly (without shifting). If you provide an `initialScreenClass` and it's incorrect, your users might see your components shift from one screen class to another when they load the page.
+
+### v0.9 - useResponsiveValue replaces responsive(Component)
+
+> Note: the 0.8.X line went for 2+ years with no major changes and is quite stable, so there's really not much reason to upgrade if it's working for your project!
 
 The reason that we haven't moved to 1.0 yet is that the API just hasn't felt quite right. It was a bit clunky and there were a few hacks behind the scenes to get it to work the way that we wanted it to work. 0.9 eliminates those hacks, improves the performance, and generally gets much closer to what we feel could be worthy of 1.0; the downside is that we needed to make some fundamental (breaking) changes.
 
@@ -254,5 +302,3 @@ const responsiveSlidesToShow = useResponsiveValue(4, { onSmallScreens: 2 });
 
 <Carousel slidesToShow={responsiveSlidesToShow} />;
 ```
-
-It's quite difficult to gather community feedback for a change like this, but we're very interested to hear how y'all feel about the change. Did you love the old API? Should we continue to support it? Do you have a use case where the new API falls short? Feel free to reach out on Twitter (@ejhammond) or to file an issue to start a discussion!

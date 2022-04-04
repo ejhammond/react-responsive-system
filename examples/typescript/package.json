@@ -17,6 +17,7 @@
     "react-responsive-system": "../../"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^5.16.3",
     "@types/react": "^17.0.43",
     "@types/react-dom": "^17.0.14",
     "parcel": "^2.4.1",
