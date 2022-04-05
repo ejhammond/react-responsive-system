@@ -7,7 +7,7 @@
     "design system",
     "component library"
   ],
-  "version": "0.10.0",
+  "version": "0.10.1",
   "sideEffects": false,
   "engines": {
     "node": "17.2"
