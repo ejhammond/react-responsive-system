@@ -8,7 +8,6 @@ const breakpoints = {
 };
 
 export const { ScreenClassProvider, useResponsiveValue } = createResponsiveSystem({
-  defaultScreenClass: 'lg',
   breakpoints,
   cascadeMode: 'mobile-first',
 });

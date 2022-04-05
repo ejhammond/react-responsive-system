@@ -1,25 +1,48 @@
 # 💬 Responsive System
 
+A tiny (yet powerful) system for when CSS media queries aren't enough.
+
+![gzip size](https://badgen.net/bundlephobia/minzip/react-responsive-system) ![weekly npm downloads](https://badgen.net/npm/dw/react-responsive-system) ![typescript types included](https://badgen.net/npm/types/react-responsive-system)
+
 ## Motivation
 
-Check out this [post](https://ayhota.com/blog/articles/responsive-react-components) to learn more about the motivation behind Responsive System.
+CSS media queries are great for dynamically changing styles based on screen size, but sometimes you need values in your JavaScript code to respond to screen-size changes as well.
 
-## Upgrading?
-
-Jump to the [Changelog](#changelog) for information about breaking changes and recommendations around upgrading.
+Check out [this blog post](https://ayhota.com/blog/articles/responsive-react-components) for a deeper dive into the problem space!
 
 ## What does it look like?
 
+You give us a list of screen size boundaries where things might need to change ("breakpoints").
+
+```js
+const breakpoints = {
+  // name them whatever you want
+  small: 768, // any screen up to 768px is called "small"
+  medium: 960, // from 769 to 960 it's "medium"
+  large: 1280, // from 960 to 1280 it's "large"
+  xl: Infinity, // anything larger than 1280 is "xl"
+  // have as many as you'd like
+};
+```
+
+and we give you back a hook for when you need a value to be responsive.
+
 ```jsx
 const MyResponsiveComponent() {
-  const message = useResponsiveValue<string>("Your screen is big", { onSmallScreens: "Your screen is small" });
-  const number = useResponsiveValue<number>(100, { onMediumScreens: 50, onSmallScreensOrSmaller: 25 });
-  // don't get hung up on the "onXScreens" language; that's fully customizable!
+  const message = useResponsiveValue(
+    "Your screen is big", // default value
+    { small: "Your screen is small" } // overrides
+  );
+  // works with any type of value
+  const number = useResponsiveValue(
+    100,
+    { large: 50, medium: 25 }
+  );
   ...
 }
 ```
 
-## Getting Started
+## Setup
 
 ```bash
 # npm
@@ -29,16 +52,16 @@ npm install react-responsive-system
 yarn add react-responsive-system
 ```
 
-1. [Define your breakpoints in JS](#1-define-your-breakpoints-in-js)
-2. [Generate your custom Responsive System with `createResponsiveSystem`](#2-generate-your-custom-responsive-system-with-createresponsivesystem)
-3. [Render the ScreenClassProvider near the root of your app](#3-render-the-screenclassprovider-near-the-root-of-your-app)
+1. [Define your breakpoints](#1-define-your-breakpoints)
+2. [Initialize the system](#2-initialize-the-system)
+3. [Render the Provider](#3-render-the-provider)
 4. [Make your components responsive](#4-make-your-components-responsive)
 
-### 1. Define your breakpoints in JS
+### 1. Define your breakpoints
 
-To keep things organized, folks often create a new file called `responsiveSystem.js/ts` where they'll configure Responsive System.
+> Tip: to keep things organized, folks often create a new file called `responsiveSystem.js/ts` where they'll configure Responsive System.
 
-But, no matter where you choose to keep the configuration, the first step is to define your breakpoints in JS:
+The first step is to define your breakpoints in JS:
 
 ```js
 /* responsiveSystem.js/ts */
@@ -51,11 +74,9 @@ const breakpoints = {
 };
 ```
 
-The values that you provide are the "maximum pixel-widths" for that screen class. In order to make sure that all possible screen pixel-sizes are handled, there should be exactly one screen class with a value of `Infinity` which tells us that there is no maximum pixel-width for that screen class.
+The values that you provide are the maximum pixel-widths for each named screen-size range ("screen class"). In order to make sure that all possible screen sizes are covered, there should be exactly one screen class with a maximum pixel-width of `Infinity`.
 
-### 2. Generate your custom Responsive System with `createResponsiveSystem`
-
-Here, you'll configure Responsive System with your breakpoints.
+### 2. Initialize the system
 
 ```js
 /* responsiveSystem.js/ts */
@@ -66,18 +87,20 @@ const breakpoints = {
   // your breakpoints here
 };
 
-export const { ScreenClassProvider, useResponsiveValue } = createResponsiveSystem({
+const { ScreenClassProvider, useResponsiveValue } = createResponsiveSystem({
   breakpoints,
 });
+
+export { ScreenClassProvider, useResponsiveValue };
 ```
 
-Let's break this down a little bit.
+We call `createResponsiveSystem` with our own custom breakpoints, and we get back a `ScreenClassProvider` (keeps track of the current screen class), and a hook called `useResponsiveValue` (creates a value that changes based on the screen class).
 
-We're calling `createResponsiveSystem` with our own custom breakpoints, and we get back a `ScreenClassProvider` (keeps track of the current screen class), and a hook called `useResponsiveValue` (creates a value that changes based on the screen class). Then, we export everything so that we can import it across our app.
+### 3. Render the Provider
 
-### 3. Render the ScreenClassProvider near the root of your app
+Somewhere near the root of your app, add the `ScreenClassProvider`. This component keeps track of the screen size and provides it to the rest of the app.
 
-```js
+```jsx
 /* index.jsx/tsx */
 
 import { ScreenClassProvider } from './responsiveSystem';
@@ -94,23 +117,24 @@ ReactDOM.render(
 
 Now that the app is aware of the current screen class, we can declare values that dynamically change to fit any screen!
 
-```js
-const MyResponsiveComponent() {
-  const message = useResponsiveValue<string>("Your screen is big", { sm: "Your screen is small" });
-  const number = useResponsiveValue<number>(100, { md: 50, sm: 25, xs: 5 });
-  // ...
+```jsx
+function ImageGallery() {
+  const imagesToShow = useResponsiveValue(
+    4 // show 4 images by default
+    {
+      md: 2, // on medium screens, show 2
+      sm: 1, // on small screens, only show 1
+    }
+  );
+  return <Gallery imagesToShow={imagesToShow} />
 }
 ```
 
 The first param is the default value (used when there are no applicable overrides) and the second param specifies the overrides. Check out the [Cascading](#cascading) section to see how you can customize the behavior of these overrides.
 
-## Examples
-
-[TypeScript + Parcel](https://github.com/ejhammond/react-responsive-system/tree/master/examples/typescript)
-
 ## Cascading
 
-By default, Responsive System overrides do not cascade, which is to say: if you add an override for screen class `X`, those overrides will only be applied when the user's browser/device matches screen class `X`. But in some cases, you might want to apply overrides on `X` and also anything larger/smaller than `X`.
+By default, Responsive System overrides do not cascade, which is to say: if you add an override for screen class `X`, those overrides will only be applied when the user's screen matches `X` _exactly_. But in some cases, you might want to apply overrides on `X` and also anything larger/smaller than `X`.
 
 This is where `cascadeMode` comes in.
 
@@ -121,10 +145,10 @@ This is where `cascadeMode` comes in.
 This is the default configuration. There is no implicit overriding in this mode.
 
 ```js
-const number = useResponsiveValue('default', { md: 'overridden' });
+const number = useResponsiveValue('default', { md: 'medium' });
 ```
 
-Result:
+Results on different screen sizes:
 
 - xl: "default"
 - lg: "default"
@@ -140,7 +164,7 @@ In Desktop First mode, your overrides implicitly override everything smaller. Co
 const number = useResponsiveValue('default', { md: 'overridden' });
 ```
 
-Result:
+Results on different screen sizes:
 
 - xl: "default"
 - lg: "default"
@@ -156,7 +180,7 @@ In Mobile First mode, your overrides implicitly override everything larger. Conc
 const number = useResponsiveValue('default', { md: 'overridden' });
 ```
 
-Result:
+Results on different screen sizes:
 
 - xl: "overridden"
 - lg: "overridden"
@@ -175,9 +199,13 @@ export const { ScreenClassProvider, useResponsiveValue } = createResponsiveSyste
 });
 ```
 
+## Examples
+
+[TypeScript + Parcel](https://github.com/ejhammond/react-responsive-system/tree/master/examples/typescript)
+
 ## Server-Side Rendering
 
-Server-Side rendering is a bit tricky because we don't have access to the user's device to measure their screen. Because we can't automatically determine the proper screen class during SSR, you must "manually" provide an `initialScreenClass` for Responsive System to render.
+Server-Side rendering is a bit tricky because when we're on the server we don't have direct access to the user's screen. Since we can't determine the screen class automatically, you must "manually" provide an `initialScreenClass` for Responsive System to render.
 
 ```js
 export const { ScreenClassProvider, useResponsiveValue } = createResponsiveSystem({
@@ -194,32 +222,30 @@ This is the easiest approach. If you don't SSR, then you don't have to worry abo
 
 ### Client-Only Components
 
-You can render some placeholder content (like a spinner/skeleton/glimmer) during SSR and then render the correct content once the code gets to the client. Showing a loading experience is better than showing an incorrect layout and then shifting it.
+You can render some placeholder content (like a spinner/skeleton/glimmer) during SSR and then render the correct content once the code gets to the client. Showing a loading experience is better than showing incorrect/broken content and then shifting it.
 
-Here's a quick implementation that you could use to render a placeholder on the server:
+Here's a quick implementation that shows how to detect whether you're rendering on the server or the client.
 
 ```jsx
 function ClientOnly({ placeholder, children }) {
-  const isOnClient = useRef(false);
+  const [isOnClient, setIsOnClient] = useState(false);
   useEffect(() => {
-    // useEffect only runs on the client
-    isOnClient.current = true;
+    setIsOnClient(true);
   }, []);
-  // will return `placeholder` on the server and `children` on the client
-  return isOnClient.current ? children : placeholder;
+  return isOnClient ? children : placeholder;
 }
-// usage
-<ClientOnly placeholder={<PlaceholderContent />}>
-  <ResponsiveComponent />
-</ClientOnly>;
 ```
+
+If you're using this pattern, I actually recommend adapting it to use React Context so that you can determine `isOnClient` once and provide that context for the lifetime of the app vs having every new component start off as `false` only to immediately switch to `true`.
 
 ### Smart Server
 
+You can try to do some clever things with your server in order to improve your chances of guessing the correct initial screen class.
+
 This route is tricky, but if you want to try it, here are some ideas:
 
-- At a minimum you can check the User-Agent Request header to get an idea of what type of device is being used (mobile vs laptop/desktop) and use that info to make an educated guess.
-- If your user is navigating from page to page in your app and you control the links, you could append width and height query params to each request before it goes out. The first page they hit wouldn't have the query params, but all subsequent pages would. And it's technically possible for someone to resize their screen after they click a link, so it's not bulletproof.
+- You can check the User-Agent Request header to get an idea of what type of device is being used (mobile vs laptop/desktop) and use that info to make an educated guess. Check out [ua-parser-js](https://www.npmjs.com/package/ua-parser-js) for parsing user agents on Node servers.
+- If your user is navigating from page to page in your app and you control the links, you could append width and height query params or custom headers to each request before it goes out.
 
 ## Extras
 
