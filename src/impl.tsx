@@ -1,15 +1,18 @@
 import * as React from 'react';
 
 //
-// ─── TYPES ──────────────────────────────────────────────────────────────────────
+// ─── TYPES ───────────────────────────────────────────────────────────────────
 //
 
 /**
  * A mapping of ScreenClass names to the maximum pixel-width where they apply
  *
- * Of course, your largest breakpoint will not have a maximum pixel-width--pass `Infinity` in order to indicate that there's no maximum.
- * Every instance of ScreenClassBreakpoints should have exactly one ScreenClass with a value of `Infinity`,
- * otherwise very-large screen sizes will manifest as having an `undefined` ScreenClass
+ * Of course, your largest breakpoint will not have a maximum pixel-width, so
+ * you should pass `Infinity` in order to indicate that.
+ *
+ * Every instance of ScreenClassBreakpoints must have exactly one ScreenClass
+ * with a value of `Infinity`, otherwise very-large screen sizes will manifest
+ * as having an `undefined` ScreenClass
  *
  * @example
  * {
@@ -31,26 +34,19 @@ export type ScreenClassConfiguration<B extends ScreenClassBreakpoints> = {
   /**
    * (SSR-only)
    *
-   * If you are server-side rendering your application, you MUST provide an initial
-   * screen class. We rely on the brower's `window` to determine the screen class; if the `window`
-   * is not available (e.g. during SSR) then we have no way of deciding which screen class to
-   * send to your app.
+   * If you are server-side rendering your application, you MUST provide an
+   * initial screen class. We rely on the browser's `window` to determine the
+   * screen class; if the `window` is not available (e.g. during SSR) then we
+   * have no way of deciding which screen class to send to your app.
    *
-   * If you are not server-side rendering your application, you should not provide an
-   * `initialScreenClass`; instead, we'll determine the initial screen class automatically on the
-   * first render.
+   * If you are not server-side rendering your application, you should not
+   * provide an `initialScreenClass`; instead, we'll determine the initial
+   * screen class automatically on the first render.
    *
-   * Note that users of the app may experience a layout shift if your `initialScreenClass` does not
-   * match their device's actual screen class.
+   * Note that users of the app may experience a layout shift if your
+   * `initialScreenClass` does not match their device's actual screen class.
    *
-   * Tips:
-   * - If you are not SSR'ing your app, leave this blank or pass `undefined`
-   * - If you must SSR your app
-   *   - You can hard-code a value, but your users may experience a layout shift if you're wrong
-   *   - You can make your responsive components "client components" by rendering a placeholder
-   *   during SSR (e.g. https://gist.github.com/gaearon/e7d97cdf38a2907924ea12e4ebdf3c85#option-2-lazily-show-component-with-uselayouteffect)
-   *   - You could theoretically try to guess a good initial screen class by inspecting the User-Agent
-   *   Request header to figure out if the request came from a mobile device vs a laptop/desktop browser
+   * See the docs on NPM or Github for more details.
    */
   initialScreenClass?: ScreenClass<B>;
 
@@ -79,12 +75,15 @@ export type ScreenClassConfiguration<B extends ScreenClassBreakpoints> = {
   cascadeMode?: CascadeMode;
 };
 
-export type ScreenClassOverrides<B extends ScreenClassBreakpoints, T> = Partial<{
+export type ScreenClassOverrides<
+  B extends ScreenClassBreakpoints,
+  T,
+> = Partial<{
   [K in ScreenClass<B>]: T;
 }>;
 
 //
-// ─── UNIT FNS ───────────────────────────────────────────────────────────────────
+// ─── UNIT FNS ────────────────────────────────────────────────────────────────
 //
 
 /**
@@ -104,10 +103,12 @@ export function sortBreakpoints<B extends ScreenClassBreakpoints>(
 }
 
 /**
- * Based on the cascade mode, determines which screen classes are relevant for the current screen
- * class and in what order they should be applied. e.g. on "md" screen, with cascade mode "desktop-first"
- * we should apply "xl" then "lg" then "md". But if cascade mode is "mobile-first" then we should
- * apply "xs" then "sm" then "md". Or if the cascade mode is "no-cascade" then just apply "md"
+ * Based on the cascade mode, determines which screen classes are relevant for
+ * the current screen class and in what order they should be applied. e.g. on
+ * "md" screen, with cascade mode "desktop-first" we should apply "xl" then "lg"
+ * then "md". But if cascade mode is "mobile-first" then we should apply "xs"
+ * then "sm" then "md". Or if the cascade mode is "no-cascade" then just apply
+ * "md"
  */
 export function getApplicableScreenClasses<B extends ScreenClassBreakpoints>({
   sortedScreenClasses,
@@ -153,7 +154,7 @@ export function applyOverrides<B extends ScreenClassBreakpoints, T>({
   let responsiveValue = defaultValue;
   applicableScreenClasses.forEach((sc) => {
     if (Object.hasOwnProperty.call(overrides, sc)) {
-      // TypeScript: since we checked hasOwnProperty, we know that this is type T
+      // TypeScript: since we checked hasOwnProperty, we know that this is T
       responsiveValue = overrides[sc] as T;
     }
   });
@@ -161,16 +162,20 @@ export function applyOverrides<B extends ScreenClassBreakpoints, T>({
 }
 
 //
-// ─── FACTORY ────────────────────────────────────────────────────────────────────
+// ─── FACTORY ─────────────────────────────────────────────────────────────────
 //
 
 export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
   screenClassConfiguration: ScreenClassConfiguration<B>,
 ) {
-  const { initialScreenClass, breakpoints, cascadeMode = 'no-cascade' } = screenClassConfiguration;
+  const {
+    initialScreenClass,
+    breakpoints,
+    cascadeMode = 'no-cascade',
+  } = screenClassConfiguration;
 
   //
-  // ─── VALIDATE ───────────────────────────────────────────────────────────────────
+  // ─── VALIDATE ──────────────────────────────────────────────────────────────
   //
 
   const breakpointValues = Object.values(breakpoints);
@@ -187,18 +192,21 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
   }
 
   //
-  // ─── SORT ───────────────────────────────────────────────────────────────────────
+  // ─── SORT ──────────────────────────────────────────────────────────────────
   //
 
   const sortedBreakpoints = sortBreakpoints(breakpoints);
 
-  const sortedScreenClasses = sortedBreakpoints.map(([screenClass]) => screenClass);
+  const sortedScreenClasses = sortedBreakpoints.map(
+    ([screenClass]) => screenClass,
+  );
 
   type MediaQuery = string;
-  const screenClassMediaQueries: [ScreenClass<B>, MediaQuery][] = sortedBreakpoints.map(
-    ([screenClass, maxWidthPx], index) => {
-      // the minWidth for this screenClass is the maxWidth of the previous breakpoint + 1
-      const minWidthPx = index > 0 ? sortedBreakpoints[index - 1][1] + 1 : 0;
+  const screenClassMediaQueries: [ScreenClass<B>, MediaQuery][] =
+    sortedBreakpoints.map(([screenClass, maxWidthPx], index) => {
+      const prev = index > 0 ? sortedBreakpoints[index - 1] : null;
+      // minWidth = prev.maxWidth + 1
+      const minWidthPx = prev !== null ? prev[1] + 1 : 0;
 
       const constraints: string[] = [];
       if (minWidthPx !== 0) {
@@ -209,11 +217,8 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
       }
 
       return [screenClass, constraints.join(' and ')];
-    },
-  );
+    });
 
-  // no-unused-vars had a false positive on screenClass here
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   type OnScreenClassChange = (screenClass: ScreenClass<B>) => void;
 
   function subscribeMediaQueries(onChange: OnScreenClassChange) {
@@ -222,8 +227,9 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
     screenClassMediaQueries.forEach(([screenClass, mediaQuery]) => {
       const mediaQueryList = window.matchMedia(mediaQuery);
 
-      // in order to set the correct initial state, we need to immediately check each mql
-      // due to the non-overlapping nature of breakpoints, exactly one media query should match
+      // in order to set the correct initial state, we need to immediately check
+      // each mql due to the non-overlapping nature of breakpoints, exactly one
+      // media query should match
       if (mediaQueryList.matches) {
         onChange(screenClass);
       }
@@ -235,31 +241,33 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
       };
 
       mediaQueryList.addEventListener('change', listener);
-      unsubscribeFns.push(() => mediaQueryList.removeEventListener('change', listener));
+      unsubscribeFns.push(() =>
+        mediaQueryList.removeEventListener('change', listener),
+      );
     });
 
     return () => unsubscribeFns.forEach((fn) => fn());
   }
 
   //
-  // ─── CONTEXT ────────────────────────────────────────────────────────────────────
+  // ─── CONTEXT ───────────────────────────────────────────────────────────────
   //
 
   const screenClassContext = React.createContext<ScreenClass<B> | null>(null);
 
   //
-  // ─── PROVIDER ───────────────────────────────────────────────────────────────────
+  // ─── PROVIDER ──────────────────────────────────────────────────────────────
   //
 
   const { Provider } = screenClassContext;
 
   const ScreenClassProvider: React.FC = ({ children }) => {
-    const [currentScreenClass, setCurrentScreenClass] = React.useState<ScreenClass<B> | undefined>(
-      initialScreenClass,
-    );
+    const [currentScreenClass, setCurrentScreenClass] = React.useState<
+      ScreenClass<B> | undefined
+    >(initialScreenClass);
 
-    // initialScreenClass will be constant throughout the lifecycle of this component
-    // so we can safely disable the rules-of-hooks here
+    // initialScreenClass will be constant throughout the lifecycle of this
+    // component so we can safely disable the rules-of-hooks here
     /* eslint-disable react-hooks/rules-of-hooks */
     if (initialScreenClass !== undefined) {
       // we have an initial screen class, so we'll render that on the first pass
@@ -268,8 +276,9 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
         return subscribeMediaQueries((sc) => setCurrentScreenClass(sc));
       }, []);
     } else {
-      // we didn't have an initial screen class, so we'll hook up our media queries
-      // before we render anything (this had better be a client-side rendered app!)
+      // we didn't have an initial screen class, so we'll hook up our media
+      // queries before we render anything (this had better be a client-side
+      // rendered app!)
       React.useLayoutEffect(() => {
         return subscribeMediaQueries((sc) => setCurrentScreenClass(sc));
       }, []);
@@ -277,8 +286,8 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
     /* eslint-enable react-hooks/rules-of-hooks */
 
     // if we got an initialScreenClass, we'll bypass this
-    // if not, then our useLayoutEffect will ensure that this null is thrown away
-    // and we'll immediately re-render with the proper screen class
+    // if not, then our useLayoutEffect will ensure that this null is thrown
+    // away and we'll immediately re-render with the proper screen class
     if (currentScreenClass === undefined) {
       return null;
     }
@@ -303,9 +312,13 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
    *
    * @param defaultValue the value to use when no appropriate override is found
    * @param overrides values to use under certain screen class conditions
-   * @returns a single value that is most appropriate given the current screen class
+   * @returns a single value that is most appropriate given the current screen
+   * class
    */
-  function useResponsiveValue<T>(defaultValue: T, overrides: ScreenClassOverrides<B, T>): T {
+  function useResponsiveValue<T>(
+    defaultValue: T,
+    overrides: ScreenClassOverrides<B, T>,
+  ): T {
     const screenClass = useScreenClass();
 
     const applicableScreenClasses = React.useMemo(
@@ -318,9 +331,10 @@ export function createResponsiveSystem<B extends ScreenClassBreakpoints>(
       [screenClass],
     );
 
-    // not worth memoizing because `overrides` is probably going to be a new object on each render.
-    // we could consider doing a shallow-equals on that object but at the end of the day, this fn
-    // is very simple and is unlikely to be a perf issue
+    // not worth memoizing because `overrides` is probably going to be a new
+    // object on each render
+    // we could consider doing a shallow-equals on that object but at the end of
+    // the day, this fn is very simple and is unlikely to be a perf issue
     return applyOverrides({
       applicableScreenClasses,
       defaultValue,

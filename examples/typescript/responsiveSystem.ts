@@ -7,10 +7,11 @@ const breakpoints = {
   lg: Infinity,
 };
 
-export const { ScreenClassProvider, useResponsiveValue } = createResponsiveSystem({
-  breakpoints,
-  cascadeMode: 'mobile-first',
-});
+export const { ScreenClassProvider, useResponsiveValue } =
+  createResponsiveSystem({
+    breakpoints,
+    cascadeMode: 'mobile-first',
+  });
 
 // convenience type
 export type Overrides<T> = ScreenClassOverrides<typeof breakpoints, T>;

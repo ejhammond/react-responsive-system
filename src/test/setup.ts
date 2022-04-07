@@ -4,12 +4,12 @@ expect.extend({
 
     if (pass) {
       return {
-        message: () => `expected ${received} not to be in [${list.join(' , ')}]`,
+        message: () => `expected ${received} not to be in [${list.join(', ')}]`,
         pass: true,
       };
     } else {
       return {
-        message: () => `expected ${received} to be in [${list.join(' , ')}]`,
+        message: () => `expected ${received} to be in [${list.join(', ')}]`,
         pass: false,
       };
     }

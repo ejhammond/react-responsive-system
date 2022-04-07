@@ -1,5 +1,9 @@
 import * as React from 'react';
-import { createResponsiveSystem, ScreenClass, ScreenClassConfiguration } from '../../..';
+import {
+  createResponsiveSystem,
+  ScreenClass,
+  ScreenClassConfiguration,
+} from '../../..';
 import { render } from '@testing-library/react';
 import { renderToString } from 'react-dom/server';
 import { hydrate } from 'react-dom';
@@ -49,9 +53,13 @@ function mockMatchMedia(screenClass: keyof typeof breakpoints) {
 
 const componentTestID = 'test-component';
 function getComponentContents(container: Element) {
-  const componentElement = container.querySelector(`[data-testid="${componentTestID}"]`);
+  const componentElement = container.querySelector(
+    `[data-testid="${componentTestID}"]`,
+  );
   if (componentElement === null) {
-    throw new Error('Could not find test component by testid in the given container');
+    throw new Error(
+      'Could not find test component by testid in the given container',
+    );
   }
   return componentElement.innerHTML;
 }
@@ -61,8 +69,12 @@ export function makeTestComponent({
   initialScreenClass,
 }: Omit<ScreenClassConfiguration<typeof breakpoints>, 'breakpoints'>): {
   testComponent: React.ReactElement;
-  getExpectedInitialContent: (screenClass: ScreenClass<typeof breakpoints>) => string;
-  getExpectedFinalContent: (screenClass: ScreenClass<typeof breakpoints>) => string;
+  getExpectedInitialContent: (
+    screenClass: ScreenClass<typeof breakpoints>,
+  ) => string;
+  getExpectedFinalContent: (
+    screenClass: ScreenClass<typeof breakpoints>,
+  ) => string;
 } {
   // createResponsiveSystem will default to 'no-cascade'; if that ever changes
   // then this line will also need to change
@@ -124,7 +136,9 @@ export function makeTestComponent({
         <ResponsiveComp />
       </ScreenClassProvider>
     ),
-    getExpectedInitialContent: (screenClass: ScreenClass<typeof breakpoints>) => {
+    getExpectedInitialContent: (
+      screenClass: ScreenClass<typeof breakpoints>,
+    ) => {
       if (initialScreenClass !== undefined) {
         return initialScreenClass;
       }
@@ -154,7 +168,9 @@ export function testCascade({
 
   // expected final content and expected initial content will be the same thing since we're
   // not providing an initialScreenClass, so we can use either one here
-  expect(getByTestId(componentTestID).innerHTML).toBe(getExpectedFinalContent(screenClass));
+  expect(getByTestId(componentTestID).innerHTML).toBe(
+    getExpectedFinalContent(screenClass),
+  );
 
   unmockMatchMedia();
 }
@@ -173,10 +189,11 @@ export function testSSR({
   document.body.appendChild(container);
 
   // create the test component
-  const { testComponent, getExpectedInitialContent, getExpectedFinalContent } = makeTestComponent({
-    cascadeMode: 'no-cascade',
-    initialScreenClass,
-  });
+  const { testComponent, getExpectedInitialContent, getExpectedFinalContent } =
+    makeTestComponent({
+      cascadeMode: 'no-cascade',
+      initialScreenClass,
+    });
 
   const expectedInitialContent = getExpectedInitialContent(initialScreenClass);
   const expectedFinalContent = getExpectedFinalContent(actualScreenClass);
